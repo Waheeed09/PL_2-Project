@@ -1,0 +1,8 @@
+# Format:
+# StudentID,ExamID,Answer1;Answer2;Answer3;...
+
+S001,E001,4;3;5
+S002,E001,5;4;4
+S003,E002,True;False;True
+S004,E001,3;4;4
+S005,E002,False;True;True

@@ -1,0 +1,13 @@
+# Format:
+# StudentID,Name,Email,Password
+
+S001,Ali,ali@gmail.com,123
+S002,Mona,mona@gmail.com,456
+S003,Omar,omar@gmail.com,789
+S004,Laila,laila@gmail.com,321
+S005,Khaled,khaled@gmail.com,654
+S006,Sara,sara@gmail.com,987
+S007,Ahmed,ahmed@gmail.com,111
+S008,Nour,nour@gmail.com,222
+S009,Hassan,hassan@gmail.com,333
+S010,Fatma,fatma@gmail.com,444
