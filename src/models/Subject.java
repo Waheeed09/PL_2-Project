@@ -1,18 +1,72 @@
 package models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Subject {
-     protected String subid;
-     protected String subname;
-    public String getSubid() {
-        return subid;
+
+    private String subjectId;
+    private String subjectName;
+    private Lecturer lecturer;   // Store full Lecturer object
+    private List<String> enrolledStudents;
+
+    // Constructor
+    public Subject(String subjectId, String subjectName, Lecturer lecturer) {
+        this.subjectId = subjectId;
+        this.subjectName = subjectName;
+        this.lecturer = lecturer;
+        this.enrolledStudents = new ArrayList<>();
     }
-    public void setSubid(String subid) {
-        this.subid = subid;
+
+    // Getters & Setters
+    public String getSubjectId() {
+        return subjectId;
     }
-    public String getSubname() {
-        return subname;
+
+    public void setSubjectId(String subjectId) {
+        this.subjectId = subjectId;
     }
-    public void setSubname(String subname) {
-        this.subname = subname;
+
+    public String getSubjectName() {
+        return subjectName;
+    }
+
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
+    }
+
+    public Lecturer getLecturer() {
+        return lecturer;
+    }
+
+    public void setLecturer(Lecturer lecturer) {
+        this.lecturer = lecturer;
+    }
+
+    // Get lecturer ID easily
+    public int getLecturerId() {
+        return lecturer.getId();   // ID inherited from User
+    }
+
+    public List<String> getEnrolledStudents() {
+        return enrolledStudents;
+    }
+
+    public void setEnrolledStudents(List<String> enrolledStudents) {
+        this.enrolledStudents = enrolledStudents;
+    }
+
+    // Utility Methods Feha Methods tba3 el admin bs eshta tt7t hna msh 7war
+    public void addStudent(String studentId) {
+        if (!enrolledStudents.contains(studentId)) {
+            enrolledStudents.add(studentId);
+        }
+    }
+    public void removeStudent(int studentId) {
+        enrolledStudents.remove(studentId);
+    }
+
+    public int getEnrollmentCount() {
+        return enrolledStudents.size();
     }
 }
