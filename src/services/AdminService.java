@@ -50,7 +50,7 @@ public class AdminService {
     
     public boolean addStudent(int id, String username, String password, String name) {
         for (Student s : students) {
-            if (s.id.equals(id)) return false;
+            if (s.id==(id)) return false;
         }
         students.add(new Student(id, username, password, name));
         dataStore.saveStudents(students);
@@ -58,7 +58,7 @@ public class AdminService {
     }
     
     public boolean deleteStudent(int id) {
-        boolean removed = students.removeIf(s -> s.id.equals(id));
+        boolean removed = students.removeIf(s -> s.id==(id));
         if (removed) {
             for (Subject subject : subjects) {
                 subject.enrolledStudents.remove(id);
@@ -71,7 +71,7 @@ public class AdminService {
     
     public boolean updateStudent(int id, String newName, String newUsername) {
         for (Student s : students) {
-            if (s.id.equals(id)) {
+            if (s.id==(id)) {
                 s.name = newName;
                 s.username = newUsername;
                 dataStore.saveStudents(students);
@@ -101,7 +101,7 @@ public class AdminService {
         boolean removed = lecturers.removeIf(l -> l.id==(id));
         if (removed) {
             for (Subject subject : subjects) {
-                if (subject.lecturerId.equals(id)) {
+                if (subject.lecturerId==(id)) {
                     subject.lecturerId = null;
                 }
             }
@@ -203,7 +203,7 @@ public class AdminService {
                 g.approved = true;
                 g.approvedBy = currentAdmin.id;
                 for (Student s : students) {
-                    if (s.id.equals(studentId)) {
+                    if (s.id==(studentId)) {
                         s.grades.put(subjectId, g.score);
                         break;
                     }
@@ -222,7 +222,7 @@ public class AdminService {
                 g.approved = true;
                 g.approvedBy = currentAdmin.id;
                 for (Student s : students) {
-                    if (s.id.equals(studentId)) {
+                    if (s.id==(studentId)) {
                         s.grades.put(subjectId, g.score);
                     }
                 }
