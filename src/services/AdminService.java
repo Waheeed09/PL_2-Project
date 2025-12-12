@@ -1,15 +1,18 @@
 package services;
 
-import models.User;
-import models.Admin;
-import models.Subject;
 import java.util.ArrayList;
 import java.util.List;
+import models.Admin;
+import models.Lecturer;
+import models.Result;
+import models.Subject;
+import models.User;
 
 public class AdminService {
 
     private List<User> users = new ArrayList<>();
     private List<Subject> subjects = new ArrayList<>();
+    private List<Result> results = new ArrayList<>();
      // -------------------
     // Admin Self Management
     // -------------------
@@ -95,7 +98,7 @@ public class AdminService {
         return false;
     }
 
-    public boolean updateSubject(String subjectId, String name, Admin lecturer) {
+    public boolean updateSubject(String subjectId, String name, Lecturer lecturer) {
         for (Subject s : subjects) {
             if (s.getSubjectId().equals(subjectId)) {
                 if (name != null) s.setSubjectName(name);
@@ -120,7 +123,7 @@ public class AdminService {
         return false;
     }
 
-    public boolean assignSubjectToLecturer(String subjectId, Admin lecturer) {
+    public boolean assignSubjectToLecturer(String subjectId, Lecturer lecturer) {
         for (Subject s : subjects) {
             if (s.getSubjectId().equals(subjectId)) {
                 s.setLecturer(lecturer);
@@ -144,7 +147,7 @@ public class AdminService {
    
 
     // -------------------
-    // Placeholder for future Grade Management
+    // Placeholder for future Result Management
     // -------------------
-    // addGrade(), approveGrade(), publishGrades() ... هيتعملوا بعد ما زمايلك يخلصوا
+    // addResult(), approveResult(), publishResult() ... هيتعملوا بعد ما زمايلك يخلصوا
 }
