@@ -4,7 +4,7 @@ import javax.swing.*;
 
 public class StudentDashboard extends JFrame {
 
-    public StudentDashboard(String studentId) {
+    public StudentDashboard(int studentId) {
 
         setTitle("Student Dashboard");
         setSize(300, 200);
@@ -25,6 +25,6 @@ public class StudentDashboard extends JFrame {
 
     // لتشغيل الـ Dashboard مباشرة (اختياري للمبتدئين)
     public static void main(String[] args) {
-        new StudentDashboard("S001"); // رقم الطالب كمثال
+        new StudentDashboard(1); // رقم الطالب كمثال
     }
 }

@@ -1,0 +1,10 @@
+examId,questionText,correctAnswer
+EX1,What is 2+2?,4
+EX1,What is 10/5?,2
+EX1,Solve 3*4?,12
+EX2,Define force?,push or pull
+EX2,What is speed of light?,3*10^8
+EX2,Unit of power?,Watt
+EX3,Translate: Book,Book
+EX3,Translate: Window,Window
+EX3,Write a sentence in English,Hello world

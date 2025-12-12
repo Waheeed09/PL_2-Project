@@ -1,8 +1,5 @@
-# Format:
-# StudentID,ExamID,Answer1;Answer2;Answer3;...
-
-S001,E001,4;3;5
-S002,E001,5;4;4
-S003,E002,True;False;True
-S004,E001,3;4;4
-S005,E002,False;True;True
+1,EX1,4;2;12
+3,EX3,book;window;hello world
+5,EX2,force is push;3*10^8;watt
+1,EX3,null|null|null
+1,EX2,null|null|null

@@ -1,0 +1,6 @@
+examId,subject
+EX1,Math
+EX2,Physics
+EX3,English
+EX4,Algorithms
+EX5,Programming
