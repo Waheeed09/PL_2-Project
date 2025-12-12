@@ -196,10 +196,10 @@ public class AdminService {
         }
         return pending;
     }
-    public boolean approveGrade(String studentId, String subjectId) {
+    public boolean approveGrade(int studentId, String subjectId) {
         if (currentAdmin == null) return false;
         for (Grade g : grades) {
-            if (g.studentId.equals(studentId) && g.subjectId.equals(subjectId) && !g.approved) {
+            if (g.studentId==(studentId) && g.subjectId.equals(subjectId) && !g.approved) {
                 g.approved = true;
                 g.approvedBy = currentAdmin.id;
                 for (Student s : students) {
