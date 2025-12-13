@@ -2,13 +2,12 @@ package models;
 
 public class Lecturer extends User {
 
-    private String subject;
-
-    public Lecturer(int id, String name, String email, String password, String subject) {
-        super(id, name, email, password, "lecturer");
-        this.subject = subject;
+    public Lecturer() {
+        super();
+        this.role = "lecturer";
     }
 
-    public String getSubject() { return subject; }
-    public void setSubject(String subject) { this.subject = subject; }
+    public Lecturer(int id, String name, String email, String password) {
+        super(id, name, email, password, "lecturer");
+    }
 }
