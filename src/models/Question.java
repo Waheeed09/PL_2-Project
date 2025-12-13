@@ -1,3 +1,5 @@
+package models;
+
 public class Question {
     public String examId;
     public String text;
@@ -20,7 +22,7 @@ public class Question {
     }
 
     // إضافة سؤال
-    public void addQuestion(Exam exam, Question1 q) {
+    public void addQuestion(Exam exam, Question q) {
         exam.questions.add(q);
     }
 
