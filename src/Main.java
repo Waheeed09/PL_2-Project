@@ -1,10 +1,18 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
+
 import models.Admin;
+import models.Exam;
 import models.Lecturer;
+import models.Question;
+import models.Student;
 import models.Subject;
 import models.User;
 import services.AdminService;
 import services.FileManager;
+import services.LecturerService;
 
 public class Main {
     public static void main(String[] args) {
@@ -44,6 +52,9 @@ public class Main {
             FileManager.saveSubjects(adminService.getSubjects());
             FileManager.saveResults(adminService.getResults());
         }
+
+        // Lecturer Demo
+        lecturerDemo();
 
         sc.close();
         System.out.println("Exiting Admin Console...");
@@ -156,5 +167,48 @@ public class Main {
         if (!e.isEmpty()) admin.setEmail(e);
         if (!p.isEmpty()) admin.setPassword(p);
         System.out.println("Admin info updated!");
+    }
+
+    // ------------------- Lecturer Demo -------------------
+    private static void lecturerDemo() {
+        System.out.println("\n===== Lecturer Demo =====");
+
+        Lecturer lecturer = new Lecturer(1, "Dr. Ahmed", "ahmed@example.com", "1234");
+        LecturerService lecturerService = new LecturerService();
+
+        String examId = "EX001";
+        String examTitle = "Java Basics";
+
+        String subjectId = "SUBJ001";
+        String lecturerId = String.valueOf(lecturer.getId());
+        int durationMinutes = 60;
+
+        Exam exam = new Exam(examId, examTitle, subjectId, lecturerId, durationMinutes);
+
+        // إضافة أسئلة
+        Question q1 = new Question(1, examId, "What is JVM?", "Java Virtual Machine", "SA", null, 1);
+        Question q2 = new Question(2, examId, "Java is platform independent? (True/False)", "True", "TF", null, 1);
+        Question q3 = new Question(3, examId, "Which keyword is used for inheritance?", "extends", "MC", Arrays.asList("super", "extends", "implements", "this"), 1);
+
+        lecturerService.addQuestion(lecturer, exam, q1);
+        lecturerService.addQuestion(lecturer, exam, q2);
+        lecturerService.addQuestion(lecturer, exam, q3);
+
+        // إنشاء طالب
+        Student student = new Student(101, "Ali", "ali@example.com", "pass");
+
+        // الطالب يجاوب
+        student.answerQuestion(1, "Java Virtual Machine");
+        student.answerQuestion(2, "True");
+        student.answerQuestion(3, "extends");
+
+        // حساب الدرجة
+        int score = lecturerService.calculateGrade(exam, student);
+        System.out.println("Student Score: " + score);
+
+        // تقرير الصف
+        List<Student> students = new ArrayList<>();
+        students.add(student);
+        lecturerService.generateClassReport(exam, students);
     }
 }
