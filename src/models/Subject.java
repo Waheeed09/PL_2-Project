@@ -5,18 +5,19 @@ import java.util.List;
 
 public class Subject {
 
-    private String subjectId;
+    
+     private String subjectId;
     private String subjectName;
-    private Lecturer lecturer;   // Store full Lecturer object
+    private Lecturer lecturer; // ممكن يكون null
     private List<String> enrolledStudents;
 
-    // Constructor
-    public Subject(String subjectId, String subjectName, Lecturer lecturer) {
+    public Subject(String subjectId, String subjectName) {
         this.subjectId = subjectId;
         this.subjectName = subjectName;
-        this.lecturer = lecturer;
         this.enrolledStudents = new ArrayList<>();
+        this.lecturer = null; // افتراضي
     }
+
 
     // Getters & Setters
     public String getSubjectId() {
