@@ -6,14 +6,4 @@ public class Admin extends User {
         
     
     }
-
-    public void manageUsers() {
-        System.out.println("Admin can manage users.");
-    }
-
-    @Override
-    public boolean login(String email, String password ) {
-        System.out.println("Admin login attempt...");
-        return super.login(email, password);
-    }
 }

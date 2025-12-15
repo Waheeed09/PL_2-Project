@@ -57,7 +57,7 @@ public class Subject {
     }
 
     // Utility Methods Feha Methods tba3 el admin bs eshta tt7t hna msh 7war
-    public void addStudent(String studentId) {
+    public void addSubjectToStudent(String studentId) {
         if (!enrolledStudents.contains(studentId)) {
             enrolledStudents.add(studentId);
         }
