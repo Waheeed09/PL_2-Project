@@ -1,12 +1,10 @@
 package services;
 
+import java.util.ArrayList;
+import java.util.List;
 import models.Exam;
 import models.Question;
-import models.Lecturer;
-
 import models.Result;
-import java.util.List;
-import java.util.ArrayList;
 
 
 public class ExamService {
