@@ -94,4 +94,9 @@ public class Question {
     public void setPoints(int points) {
         this.points = points;
     }
+    public boolean isAnsweredCorrectlyBy(Student student) {
+    if (student == null) return false;
+    String ans = student.getAnswerForQuestion(String.valueOf(this.id));
+    return isCorrectAnswer(ans);
+}
 }
