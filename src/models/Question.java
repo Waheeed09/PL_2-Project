@@ -96,7 +96,7 @@ public class Question {
     }
     public boolean isAnsweredCorrectlyBy(Student student) {
     if (student == null) return false;
-    String ans = student.getAnswerForQuestion(String.valueOf(this.id));
+    String ans = student.getAnswerForQuestion(this.id);
     return isCorrectAnswer(ans);
 }
 }
