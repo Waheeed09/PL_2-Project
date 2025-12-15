@@ -1,57 +1,27 @@
 package models;
 
 public class Question {
-    public String examId;
-    public String text;
-    public String correct;
-    protected int id;
-    protected String text1;
 
-    public Question(){ }
+    private int id;
+    private String text;
+    private String correctAnswer;
 
-    public Question(String examId, String text, String correct) {
-        this.examId = examId;
-        this.text = text;
-        this.correct = correct;
-    }
-
-
-    public Question(int id, String text1) {
+    public Question(int id, String text, String correctAnswer) {
         this.id = id;
-        this.text1 = text1;
+        this.text = text;
+        this.correctAnswer = correctAnswer;
     }
 
-    // إضافة سؤال
-    public void addQuestion(Exam exam, Question q) {
-        exam.questions.add(q);
+    public int getId() {
+        return id;
     }
 
-    // تعديل سؤال
-    public void updateQuestion(Exam exam, int id, String newText) {
-        for (int i = 0; i < exam.questions.size(); i++) {
-            if (exam.questions.get(i).id == id) {
-                exam.questions.get(i).text = newText;
-                break;
-            }
-        }
+    public String getText() {
+        return text;
     }
 
-    // حذف سؤال
-    public void deleteQuestion(Exam exam, int id) {
-        for (int i = 0; i < exam.questions.size(); i++) {
-            if (exam.questions.get(i).id == id) {
-                exam.questions.remove(i);
-                break;
-            }
-        }
+    public boolean isAnsweredCorrectlyBy(Student student) {
+        String studentAnswer = student.getAnswerForQuestion(id);
+        return correctAnswer.equals(studentAnswer);
     }
-
-    // عرض الأسئلة
-    public void showQuestions(Exam exam) {
-        for (int i = 0; i < exam.questions.size(); i++) {
-            Question q = exam.questions.get(i);
-            System.out.println(q.id + " - " + q.text);
-        }
-    }
-
 }

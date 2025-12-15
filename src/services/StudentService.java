@@ -6,14 +6,18 @@ import models.Question;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class StudentService {
 
-private final String STUDENTS_FILE = "data/students.txt";
-private final String EXAMS_FILE = "data/exams.txt";
-private final String QUESTIONS_FILE = "data/questions.txt";
-private final String SUBMISSIONS_FILE = "data/submissions.txt";
+    private final String STUDENTS_FILE = "data/students.txt";
+    private final String EXAMS_FILE = "data/exams.txt";
+    private final String QUESTIONS_FILE = "data/questions.txt";
+    private final String SUBMISSIONS_FILE = "data/submissions.txt";
 
+    // تخزين مؤقت لإجابات الطلاب قبل الحفظ النهائي
+    private Map<Integer, Map<Integer, String>> tempAnswers = new HashMap<>();
 
     // ------------------------------------------
     // تحميل كل الطلاب
@@ -58,7 +62,7 @@ private final String SUBMISSIONS_FILE = "data/submissions.txt";
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty() || line.startsWith("examId")) continue;
-                String[] p = line.split(",");
+                String[] p = line.split(",", 2);
                 exams.add(new Exam(p[0], p[1]));
             }
         } catch (Exception e) {
@@ -70,35 +74,57 @@ private final String SUBMISSIONS_FILE = "data/submissions.txt";
     // ------------------------------------------
     // تحميل الأسئلة لامتحان محدد
     // ------------------------------------------
-public ArrayList<Question> loadQuestions(String examId) {
-    ArrayList<Question> questions = new ArrayList<>();
-    try (BufferedReader br = new BufferedReader(new FileReader(QUESTIONS_FILE))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-            if (line.trim().isEmpty() || line.startsWith("examId")) continue;
-            String[] p = line.split(",", 3); // examId,text,correct
-            if (p[0].equals(examId)) {
-                questions.add(new Question(p[0], p[1], p[2]));
+    public ArrayList<Question> loadQuestions(String examId) {
+        ArrayList<Question> questions = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(QUESTIONS_FILE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty() || line.startsWith("examId")) continue;
+
+                // format: examId,questionId,text,correct
+                String[] p = line.split(",", 4);
+                if (p[0].equals(examId)) {
+                    int questionId = Integer.parseInt(p[1]);
+                    questions.add(new Question(questionId, p[2], p[3]));
+                }
             }
+        } catch (Exception e) {
+            System.out.println("Error loading questions");
         }
-    } catch (Exception e) {
-        System.out.println("Error loading questions");
+        return questions;
     }
-    return questions;
-}
-
 
     // ------------------------------------------
-    // حفظ إجابات الطالب
+    // حفظ إجابة طالب مؤقتًا
     // ------------------------------------------
-    public void saveSubmission(int studentId, String examId, ArrayList<String> answers) {
-        String joined = String.join("|", answers);
+    public void answerQuestion(int studentId, int questionId, String answer) {
+        tempAnswers.putIfAbsent(studentId, new HashMap<>());
+        tempAnswers.get(studentId).put(questionId, answer);
+    }
+
+    // ------------------------------------------
+    // حفظ إجابات الطالب النهائية في الملف
+    // ------------------------------------------
+    public void saveSubmission(int studentId, String examId) {
+        if (!tempAnswers.containsKey(studentId)) return;
+
+        Map<Integer, String> answers = tempAnswers.get(studentId);
+
+        // format: studentId,examId,questionId1|answer1;questionId2|answer2;...
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<Integer, String> entry : answers.entrySet()) {
+            sb.append(entry.getKey()).append("|").append(entry.getValue()).append(";");
+        }
+
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(SUBMISSIONS_FILE, true))) {
-            bw.write(studentId + "," + examId + "," + joined);
+            bw.write(studentId + "," + examId + "," + sb.toString());
             bw.newLine();
         } catch (Exception e) {
             System.out.println("Error saving submission");
         }
+
+        // مسح مؤقت بعد الحفظ
+        tempAnswers.remove(studentId);
     }
 
     // ------------------------------------------
@@ -108,12 +134,14 @@ public ArrayList<Question> loadQuestions(String examId) {
         try (BufferedReader br = new BufferedReader(new FileReader(SUBMISSIONS_FILE))) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] p = line.split(",");
+                String[] p = line.split(",", 3);
                 if (Integer.parseInt(p[0]) == studentId && p[1].equals(examId)) {
                     return true;
                 }
             }
-        } catch (Exception e) { }
+        } catch (Exception e) {
+            System.out.println("Error reading submissions");
+        }
         return false;
     }
 }

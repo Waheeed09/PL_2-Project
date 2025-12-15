@@ -38,9 +38,13 @@ public class TakeExamForm extends JFrame {
 
             StringBuilder sb = new StringBuilder();
             for (Exam ex : exams) {
-                sb.append(ex.examId).append(" - ").append(ex.subjectName).append("\n");
+                sb.append(ex.getExamId())
+                .append(" - ")
+                .append(ex.getTitle())
+                .append("\n");
             }
             area.setText(sb.toString());
+
 
             String chosen = JOptionPane.showInputDialog(this, "Enter exam ID from above list:");
             if (chosen != null) {
@@ -56,15 +60,19 @@ public class TakeExamForm extends JFrame {
     }
 
     private void startExam(String examId) {
-        ArrayList<Question> questions = studentService.loadQuestions(examId);
-        ArrayList<String> answers = new ArrayList<>();
+    ArrayList<Question> questions = studentService.loadQuestions(examId);
 
-        for (Question q : questions) {
-            String ans = JOptionPane.showInputDialog(this, "Question:\n" + q.text);
-            answers.add(ans);
-        }
+    for (Question q : questions) {
+        String ans = JOptionPane.showInputDialog(
+                this,
+                "Question:\n" + q.getText()
+        );
 
-        studentService.saveSubmission(studentId, examId, answers);
-        JOptionPane.showMessageDialog(this, "Exam submitted!");
+        studentService.answerQuestion(studentId, q.getId(), ans);
     }
+
+    studentService.saveSubmission(studentId, examId);
+    JOptionPane.showMessageDialog(this, "Exam submitted!");
+}
+
 }
