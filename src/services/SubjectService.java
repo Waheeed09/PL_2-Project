@@ -1,19 +1,15 @@
 package services;
 import java.util.ArrayList;
 import java.util.List;
-import models.Admin;
-import models.Lecturer;
-import models.Result;
+import java.io.*;
 import models.Subject;
-import models.User;
 public class SubjectService {
- private List<Subject> subjects;
+    private List<Subject> subjects;
     private static final String SUBJECTS_FILE = "subjects.txt";
     public SubjectService() {
         this.subjects = new ArrayList<>();
         loadSubjects();
     }
-    // Load subjects 
     private void loadSubjects() {
         try (BufferedReader reader = new BufferedReader(new FileReader(SUBJECTS_FILE))) {
             String line;
@@ -22,42 +18,40 @@ public class SubjectService {
                 if (parts.length >= 2) {
                     String subjectId = parts[0];
                     String subjectName = parts[1];
-                    Integer lecturerId = parts.length > 2 && !parts[2].equals("null") ? Integer.parseInt(parts[2]) : null;
-                    Subject subject = new Subject(subjectId, subjectName, lecturerId);
-                    // Load enrolled students if Exist
+                    Subject subject = new Subject(subjectId, subjectName);
+                    if (parts.length > 2 && !parts[2].equals("null")) {
+                        subject.lecturerId = Integer.parseInt(parts[2]);
+                    }
                     if (parts.length > 3 && !parts[3].isEmpty()) {
                         String[] studentIds = parts[3].split(";");
                         for (String studentId : studentIds) {
-                            if (!studentId.isEmpty()) {
-                                subject.enrolledStudents.add(Integer.parseInt(studentId));
-                            }
+                            subject.getEnrolledStudents().add(studentId);
                         }
                     }
                     subjects.add(subject);
                 }
             }
         } catch (FileNotFoundException e) {
-            // File doesn't exist start with empty list
             subjects = new ArrayList<>();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    // Save subjects 
     private void saveSubjects() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(SUBJECTS_FILE))) {
+        try (BufferedWriter writer =
+                     new BufferedWriter(new FileWriter(SUBJECTS_FILE))) {
             for (Subject subject : subjects) {
                 StringBuilder line = new StringBuilder();
                 line.append(subject.subjectId).append(",");
                 line.append(subject.subjectName).append(",");
-                line.append(subject.lecturerId != null ? subject.lecturerId : "null").append(",");
-                // Save students
-                if (subject.enrolledStudents != null && !subject.enrolledStudents.isEmpty()) {
-                    for (int i = 0; i < subject.enrolledStudents.size(); i++) {
-                        line.append(subject.enrolledStudents.get(i));
-                        if (i < subject.enrolledStudents.size() - 1) {
-                            line.append(";");
-                        }
+                line.append(subject.lecturerId != 0
+                        ? subject.lecturerId
+                        : "null").append(",");
+                List<String> students = subject.getEnrolledStudents();
+                for (int i = 0; i < students.size(); i++) {
+                    line.append(students.get(i));
+                    if (i < students.size() - 1) {
+                        line.append(";");
                     }
                 }
                 writer.write(line.toString());
@@ -69,40 +63,35 @@ public class SubjectService {
     }
     public boolean addSubject(String subjectId, String subjectName) {
         for (Subject sub : subjects) {
-            if (sub.subjectId.equals(subjectId)) return false;
+            if (sub.subjectId.equals(subjectId)) {
+                return false;
+            }
         }
-        subjects.add(new Subject(subjectId, subjectName, null));
+        subjects.add(new Subject(subjectId, subjectName));
         saveSubjects();
         return true;
     }
-    
     public boolean assignSubjectToLecturer(String subjectId, int lecturerId) {
-        Subject subject = null;
-        for (Subject sub : subjects) {
-            if (sub.subjectId.equals(subjectId)) {
-                subject = sub;
-                break;
+        for (Subject subject : subjects) {
+            if (subject.subjectId.equals(subjectId)) {
+                subject.lecturerId = lecturerId;
+                saveSubjects();
+                return true;
             }
         }
-        if (subject == null) return false;
-        subject.lecturerId = lecturerId;
-        saveSubjects();
-        return true;
+        return false;
     }
     public boolean enrollStudentInSubject(int studentId, String subjectId) {
-        Subject subject = null;
-        for (Subject sub : subjects) {
-            if (sub.subjectId.equals(subjectId)) {
-                subject = sub;
-                break;
+        for (Subject subject : subjects) {
+            if (subject.getSubjectId().equals(subjectId)) {
+                if (!subject.getEnrolledStudents().contains(String.valueOf(studentId))) {
+                    subject.getEnrolledStudents().add(String.valueOf(studentId));
+                    saveSubjects();
+                }
+                return true;
             }
         }
-        if (subject == null) return false;
-        if (!subject.enrolledStudents.contains(studentId)) {
-            subject.enrolledStudents.add(studentId);
-        }
-        saveSubjects();
-        return true;
+        return false;
     }
     public List<Subject> getAllSubjects() {
         return new ArrayList<>(subjects);
