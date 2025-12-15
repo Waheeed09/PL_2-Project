@@ -1,13 +1,12 @@
 package services;
 
-import models.Student;
-import models.Exam;
-import models.Question;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import models.Exam;
+import models.Question;
+import models.Student;
 
 public class StudentService {
 
@@ -63,7 +62,7 @@ public class StudentService {
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty() || line.startsWith("examId")) continue;
                 String[] p = line.split(",", 2);
-                exams.add(new Exam(p[0], p[1]));
+                exams.add(new Exam(p[0], p[1],p[2],p[3], Integer.parseInt(p[4])));
             }
         } catch (Exception e) {
             System.out.println("Error loading exams");
