@@ -1,37 +1,39 @@
 package models;
 
-public class Result extends User {
-    private String course;
-    private double marks;
+public class Result {
+    private String studentId;
+    private String subjectId;
+    private double grade;
+    private boolean approved;
 
-    public Result(int id, String name, String email, String password, String role,
-                  String course, double marks) {
-        super(id, name, email, password, role);
-        this.course = course;
-        this.marks = marks;
+    public Result(String studentId, String subjectId, double grade) {
+        this.studentId = studentId;
+        this.subjectId = subjectId;
+        this.grade = grade;
+        this.approved = false; // default
     }
 
-    public String getCourse() { return course; }
-    public void setCourse(String course) { this.course = course; }
+    // Getters and setters
+    public String getStudentId() { return studentId; }
+    public void setStudentId(String studentId) { this.studentId = studentId; }
 
-    public double getMarks() { return marks; }
-    public void setMarks(double marks) { this.marks = marks; }
+    public String getSubjectId() { return subjectId; }
+    public void setSubjectId(String subjectId) { this.subjectId = subjectId; }
 
-    public String calculateGrade() {
-        if (marks >= 90) return "A";
-        else if (marks >= 80) return "B";
-        else if (marks >= 70) return "C";
-        else if (marks >= 60) return "D";
-        else return "F";
-    }
+    public double getGrade() { return grade; }
+    public void setGrade(double grade) { this.grade = grade; }
 
-    public void displayResult() {
-        System.out.println("Student ID: " + id);  
-        System.out.println("Name: " + name);     
-        System.out.println("Email: " + email);   
-        System.out.println("Role: " + role);     
-        System.out.println("Course: " + course);
-        System.out.println("Marks: " + marks);
-        System.out.println("Grade: " + calculateGrade());
+    public boolean isApproved() { return approved; }
+    public void setApproved(boolean approved) { this.approved = approved; }
+
+    @Override
+    public String toString() {
+        return "Result{" +
+               "studentId='" + studentId + '\'' +
+               ", subjectId='" + subjectId + '\'' +
+               ", grade=" + grade +
+               ", approved=" + approved +
+               '}';
     }
 }
+

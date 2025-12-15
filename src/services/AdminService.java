@@ -191,5 +191,28 @@ public class AdminService {
         }
         System.out.println("All results approved successfully");
     }
+    ///-------------------
+    /// sum functions to get 
+    /// -------------------
+    /// 
+public List<User> getUsers() {
+    return users;
+}
+
+public void setUsers(List<User> users) {
+    this.users = users;
+}
+
+public List<Subject> getSubjects() {
+    return subjects;
+}
+
+public void setSubjects(List<Subject> subjects) {
+    this.subjects = subjects;
+}
+
+public void setResults(List<Result> results) {
+    this.results = results;
+}
     
 }
