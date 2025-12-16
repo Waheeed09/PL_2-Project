@@ -20,7 +20,10 @@ public class SubjectService {
                     String subjectName = parts[1];
                     Subject subject = new Subject(subjectId, subjectName);
                     if (parts.length > 2 && !parts[2].equals("null")) {
-                        subject.lecturerId = Integer.parseInt(parts[2]);
+                        try {
+                            subject.setLecturerId(Integer.parseInt(parts[2]));
+                        } catch (NumberFormatException ignored) {
+                        }
                     }
                     if (parts.length > 3 && !parts[3].isEmpty()) {
                         String[] studentIds = parts[3].split(";");
@@ -42,11 +45,10 @@ public class SubjectService {
                      new BufferedWriter(new FileWriter(SUBJECTS_FILE))) {
             for (Subject subject : subjects) {
                 StringBuilder line = new StringBuilder();
-                line.append(subject.subjectId).append(",");
-                line.append(subject.subjectName).append(",");
-                line.append(subject.lecturerId != 0
-                        ? subject.lecturerId
-                        : "null").append(",");
+                line.append(subject.getSubjectId()).append(",");
+                line.append(subject.getSubjectName()).append(",");
+                int lid = subject.getLecturerId();
+                line.append(lid != 0 ? String.valueOf(lid) : "null").append(",");
                 List<String> students = subject.getEnrolledStudents();
                 for (int i = 0; i < students.size(); i++) {
                     line.append(students.get(i));
@@ -63,7 +65,7 @@ public class SubjectService {
     }
     public boolean addSubject(String subjectId, String subjectName) {
         for (Subject sub : subjects) {
-            if (sub.subjectId.equals(subjectId)) {
+            if (sub.getSubjectId().equals(subjectId)) {
                 return false;
             }
         }
@@ -73,8 +75,8 @@ public class SubjectService {
     }
     public boolean assignSubjectToLecturer(String subjectId, int lecturerId) {
         for (Subject subject : subjects) {
-            if (subject.subjectId.equals(subjectId)) {
-                subject.lecturerId = lecturerId;
+            if (subject.getSubjectId().equals(subjectId)) {
+                subject.setLecturerId(lecturerId);
                 saveSubjects();
                 return true;
             }
