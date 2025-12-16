@@ -34,6 +34,11 @@ public class Question {
         this.points = 1;
     }
 
+    // Setter for examId to support loading from FileManager
+    public void setExamId(String examId) {
+        this.examId = examId;
+    }
+
     // ================= Logic =================
 
     public boolean isCorrectAnswer(String answer) {
@@ -44,6 +49,11 @@ public class Question {
     // ================= Getters =================
 
     public int getId() {
+        return id;
+    }
+
+    // Backwards-compatible name used in FileManager
+    public int getQuestionId() {
         return id;
     }
 

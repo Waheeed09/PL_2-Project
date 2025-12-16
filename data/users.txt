@@ -6,3 +6,7 @@
 1,name,name@,12345,admin
 3,new,new@,123456,admin
 1,name,ma@,1234,admin
+12,ibrem,ib@,123,admin
+1,dr peter,a7a@,1234,lecturer
+1,dr hema,ham@,123,lecturer
+21,dr habdullah,abd@,12345,student

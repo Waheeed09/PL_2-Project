@@ -40,6 +40,8 @@ public class AdminService {
     }
 
     users.add(user);
+    // Persist users and role-specific files
+    FileManager.saveUsersAndRoles(users);
     System.out.println("User added successfully");
 }
 
@@ -48,6 +50,8 @@ public class AdminService {
         for (User u : users) {
             if (u.getId() == id) {
                 users.remove(u);
+                // Persist changes
+                FileManager.saveUsersAndRoles(users);
                 System.out.println(" User deleted: " + u);
                 return true;
             }
@@ -67,9 +71,10 @@ public class AdminService {
             if (name != null) u.setName(name);
             if (email != null) u.setEmail(email);
             if (password != null) u.setPassword(password);
-
-            System.out.println("User updated successfully");
-            return true;
+                // Persist changes after update
+                FileManager.saveUsersAndRoles(users);
+                System.out.println("User updated successfully");
+                return true;
         }
     }
 

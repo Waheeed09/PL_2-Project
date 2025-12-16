@@ -4,3 +4,4 @@ Physics,Physics
 English,English Language
 Algorithms,Algorithms
 Programming,Programming
+1,cs

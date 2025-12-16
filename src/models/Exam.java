@@ -44,6 +44,14 @@ public class Exam {
         return questions;
     }
 
+    public String getLecturerId() {
+        return lecturerId;
+    }
+
+    public int getDurationMinutes() {
+        return durationMinutes;
+    }
+
     public List<Result> getResults() {
         return results;
     }
