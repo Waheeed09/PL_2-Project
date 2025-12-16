@@ -1,5 +1,6 @@
 package services;
 
+<<<<<<< HEAD
 import java.util.List;
 import models.User;
 
@@ -16,11 +17,32 @@ public class UserService {
         for (User user : users) {
             if (user.login(email, password)) {
                 return user;
+=======
+import java.util.ArrayList;
+
+public class UserService {
+
+    private ArrayList<User> users = new ArrayList<>();
+
+    public UserService() {
+
+        users.add(new Admin(1, "Admin", "admin@mail.com", "admin", "1234"));
+        users.add(new Student(2,"IBRAHIM","IB515@mail.com","St","0007"));
+    }
+
+    public User login(String username, String password) {
+        for (User u : users) {
+            if (u.getUsername() != null &&
+                    u.getUsername().equals(username) &&
+                    u.getPassword().equals(password)) {
+                return u;
+>>>>>>> 6cc7963319aaf4ed613e38088c217b350fe09652
             }
         }
         return null;
     }
 
+<<<<<<< HEAD
     // Register a new user
     public boolean register(User newUser) {
         // Check if email already exists
@@ -71,4 +93,12 @@ public class UserService {
     public List<User> getAllUsers() {
         return users;
     }
+=======
+>>>>>>> 6cc7963319aaf4ed613e38088c217b350fe09652
 }
+
+
+
+
+
+
