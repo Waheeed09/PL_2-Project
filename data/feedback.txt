@@ -1,4 +1,0 @@
-id|studentId|examId|timestamp|message
-1|101|5|2025-12-16T12:34:56|Good exam, questions were clear.
-2|102|5|2025-12-16T12:40:00|Question 3 has a typo 'teh' -> 'the'.
-3|0|0|2025-12-16T13:00:00|Login failed twice during the test — please check session timeout.

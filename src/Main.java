@@ -60,9 +60,7 @@ public class Main {
         String email = sc.nextLine();
         System.out.print("Enter password: ");
         String password = sc.nextLine();
-        User user = userService.login(email, password);
-        FileManager.saveLoginLog(email, user != null);
-        return user;
+        return userService.login(email, password);
     }
 
     // ------------------- Admin Menu -------------------
