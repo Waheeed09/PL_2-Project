@@ -1,29 +1,70 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
-
 import models.Admin;
-import models.Exam;
 import models.Lecturer;
-import models.Question;
 import models.Student;
 import models.Subject;
 import models.User;
 import services.AdminService;
 import services.FileManager;
 import services.LecturerService;
+import services.StudentService;
+import services.UserService;
 
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         AdminService adminService = new AdminService();
+        StudentService studentService = new StudentService();
+        UserService userService;
 
         // Load data from files
         adminService.setUsers(FileManager.loadUsers());
         adminService.setSubjects(FileManager.loadSubjects());
         adminService.setResults(FileManager.loadResults());
+        studentService.loadStudents();
 
+        userService = new UserService(adminService.getUsers());
+
+        // Login
+        User loggedInUser = login(sc, userService);
+        if (loggedInUser == null) {
+            System.out.println("Login failed. Exiting...");
+            sc.close();
+            return;
+        }
+
+        // Role-based menu
+        if ("admin".equals(loggedInUser.getRole())) {
+            adminMenu(adminService, studentService, sc);
+        } else if ("student".equals(loggedInUser.getRole())) {
+            studentMenu(studentService, sc, loggedInUser.getId());
+        } else if ("lecturer".equals(loggedInUser.getRole())) {
+            lecturerMenu(sc);
+        } else {
+            System.out.println("Unknown role. Exiting...");
+        }
+
+        // Save data
+        FileManager.saveUsers(adminService.getUsers());
+        FileManager.saveSubjects(adminService.getSubjects());
+        FileManager.saveResults(adminService.getResults());
+
+        sc.close();
+        System.out.println("Exiting...");
+    }
+
+    // ------------------- Login -------------------
+    private static User login(Scanner sc, UserService userService) {
+        System.out.println("===== Login =====");
+        System.out.print("Enter email: ");
+        String email = sc.nextLine();
+        System.out.print("Enter password: ");
+        String password = sc.nextLine();
+        return userService.login(email, password);
+    }
+
+    // ------------------- Admin Menu -------------------
+    private static void adminMenu(AdminService adminService, StudentService studentService, Scanner sc) {
         Admin admin = new Admin(1, "Admin", "admin@example.com", "1234");
 
         boolean exit = false;
@@ -33,8 +74,9 @@ public class Main {
             System.out.println("1. User Management");
             System.out.println("2. Subject Management");
             System.out.println("3. Result Management");
-            System.out.println("4. Update Admin Info");
-            System.out.println("5. Exit");
+            System.out.println("4. Student Management");
+            System.out.println("5. Update Admin Info");
+            System.out.println("6. Exit");
             System.out.print("Enter choice: ");
             String choice = sc.nextLine();
 
@@ -42,22 +84,12 @@ public class Main {
                 case "1": userMenu(adminService, sc); break;
                 case "2": subjectMenu(adminService, sc); break;
                 case "3": resultMenu(adminService, sc); break;
-                case "4": updateAdminInfo(admin, sc); break;
-                case "5": exit = true; break;
+                case "4": studentMenu(studentService, sc); break;
+                case "5": updateAdminInfo(admin, sc); break;
+                case "6": exit = true; break;
                 default: System.out.println("Invalid choice");
             }
-
-            // Save after every operation
-            FileManager.saveUsers(adminService.getUsers());
-            FileManager.saveSubjects(adminService.getSubjects());
-            FileManager.saveResults(adminService.getResults());
         }
-
-        // Lecturer Demo
-        lecturerDemo();
-
-        sc.close();
-        System.out.println("Exiting Admin Console...");
     }
 
     // ------------------- User Menu -------------------
@@ -158,6 +190,115 @@ public class Main {
         }
     }
 
+    // ------------------- Student Menu -------------------
+    private static void studentMenu(StudentService studentService, Scanner sc) {
+        studentMenu(studentService, sc, 0); // Admin mode
+    }
+
+    private static void studentMenu(StudentService studentService, Scanner sc, int studentId) {
+        if (studentId == 0) {
+            // Admin mode
+            System.out.println("\n--- Student Management ---");
+            System.out.println("1. List Students");
+            System.out.println("2. Add Student");
+            System.out.print("Choice: ");
+            String c = sc.nextLine();
+
+            switch (c) {
+                case "1":
+                    studentService.displayStudents();
+                    break;
+                case "2":
+                    // Add student logic
+                    System.out.println("Add student not implemented");
+                    break;
+                default:
+                    System.out.println("Invalid choice");
+            }
+        } else {
+            // Student mode
+            boolean exit = false;
+            while (!exit) {
+                System.out.println("\n===== Student Menu =====");
+                System.out.println("1. View Profile");
+                System.out.println("2. Take Exam");
+                System.out.println("3. View Results");
+                System.out.println("4. Exit");
+                System.out.print("Choice: ");
+                String c = sc.nextLine();
+
+                switch (c) {
+                    case "1":
+                        Student student = studentService.getStudentById(studentId);
+                        if (student != null) {
+                            System.out.println("Profile: " + student);
+                        } else {
+                            System.out.println("Student not found.");
+                        }
+                        break;
+                    case "2":
+                        System.out.print("Enter Exam ID: ");
+                        String examId = sc.nextLine();
+                        studentService.takeExam(studentId, examId);
+                        break;
+                    case "3":
+                        // View results for student
+                        System.out.println("Results: (Not implemented yet)");
+                        break;
+                    case "4": exit = true; break;
+                    default: System.out.println("Invalid choice");
+                }
+            }
+        }
+    }
+
+    // ------------------- Lecturer Menu -------------------
+    private static void lecturerMenu(Scanner sc) {
+        Lecturer lecturer = new Lecturer(1, "Dr. Ahmed", "ahmed@example.com", "1234");
+        LecturerService lecturerService = new LecturerService();
+
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("\n===== Lecturer Menu =====");
+            System.out.println("1. Create Exam");
+            System.out.println("2. Modify Exam");
+            System.out.println("3. Delete Exam");
+            System.out.println("4. View Exams");
+            System.out.println("5. Exit");
+            System.out.print("Choice: ");
+            String c = sc.nextLine();
+
+            switch (c) {
+                case "1":
+                    System.out.print("Enter Exam ID: ");
+                    String examId = sc.nextLine();
+                    System.out.print("Enter Exam Title: ");
+                    String title = sc.nextLine();
+                    lecturerService.createExam(lecturer, examId, title);
+                    break;
+                case "2":
+                    System.out.print("Enter Old Exam ID: ");
+                    String oldId = sc.nextLine();
+                    System.out.print("Enter New Exam ID: ");
+                    String newId = sc.nextLine();
+                    System.out.print("Enter New Title: ");
+                    String newTitle = sc.nextLine();
+                    lecturerService.modifyExam(lecturer, oldId, newId, newTitle);
+                    break;
+                case "3":
+                    System.out.print("Enter Exam ID to delete: ");
+                    String delId = sc.nextLine();
+                    lecturerService.deleteExam(lecturer, delId);
+                    break;
+                case "4":
+                    lecturerService.viewExams(lecturer);
+                    break;
+                case "5": exit = true; break;
+                default: System.out.println("Invalid choice");
+            }
+        }
+    }
+
     // ------------------- Update Admin Info -------------------
     private static void updateAdminInfo(Admin admin, Scanner sc) {
         System.out.print("New Name (leave blank to skip): "); String n = sc.nextLine();
@@ -167,48 +308,5 @@ public class Main {
         if (!e.isEmpty()) admin.setEmail(e);
         if (!p.isEmpty()) admin.setPassword(p);
         System.out.println("Admin info updated!");
-    }
-
-    // ------------------- Lecturer Demo -------------------
-    private static void lecturerDemo() {
-        System.out.println("\n===== Lecturer Demo =====");
-
-        Lecturer lecturer = new Lecturer(1, "Dr. Ahmed", "ahmed@example.com", "1234");
-        LecturerService lecturerService = new LecturerService();
-
-        String examId = "EX001";
-        String examTitle = "Java Basics";
-
-        String subjectId = "SUBJ001";
-        String lecturerId = String.valueOf(lecturer.getId());
-        int durationMinutes = 60;
-
-        Exam exam = new Exam(examId, examTitle, subjectId, lecturerId, durationMinutes);
-
-        // إضافة أسئلة
-        Question q1 = new Question(1, examId, "What is JVM?", "Java Virtual Machine", "SA", null, 1);
-        Question q2 = new Question(2, examId, "Java is platform independent? (True/False)", "True", "TF", null, 1);
-        Question q3 = new Question(3, examId, "Which keyword is used for inheritance?", "extends", "MC", Arrays.asList("super", "extends", "implements", "this"), 1);
-
-        lecturerService.addQuestion(lecturer, exam, q1);
-        lecturerService.addQuestion(lecturer, exam, q2);
-        lecturerService.addQuestion(lecturer, exam, q3);
-
-        // إنشاء طالب
-        Student student = new Student(101, "Ali", "ali@example.com", "pass");
-
-        // الطالب يجاوب
-        student.answerQuestion(1, "Java Virtual Machine");
-        student.answerQuestion(2, "True");
-        student.answerQuestion(3, "extends");
-
-        // حساب الدرجة
-        int score = lecturerService.calculateGrade(exam, student);
-        System.out.println("Student Score: " + score);
-
-        // تقرير الصف
-        List<Student> students = new ArrayList<>();
-        students.add(student);
-        lecturerService.generateClassReport(exam, students);
     }
 }

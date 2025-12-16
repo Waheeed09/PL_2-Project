@@ -1,0 +1,6 @@
+subjectId,subjectName
+Math,Mathematics
+Physics,Physics
+English,English Language
+Algorithms,Algorithms
+Programming,Programming

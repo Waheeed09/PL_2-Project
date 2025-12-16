@@ -1,0 +1,10 @@
+1,Math,85,true
+2,Math,78,false
+3,Physics,92,true
+4,Physics,88,true
+5,English,75,false
+6,English,80,true
+7,Algorithms,95,true
+8,Algorithms,70,false
+9,Programming,85,true
+10,Programming,90,true

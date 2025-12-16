@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import models.Exam;
 import models.Question;
 import models.Student;
@@ -41,11 +42,61 @@ public class StudentService {
     }
 
     // ------------------------------------------
-    // تسجيل دخول الطالب
+    // عرض الطلاب
     // ------------------------------------------
-    public Student login(String email, String password) {
+    public void displayStudents() {
+        ArrayList<Student> students = loadStudents();
+        if (students.isEmpty()) {
+            System.out.println("No students found.");
+            return;
+        }
+        System.out.println("Students:");
+        for (Student s : students) {
+            System.out.println(s);
+        }
+    }
+
+    // ------------------------------------------
+    // أداء امتحان
+    // ------------------------------------------
+    public void takeExam(int studentId, String examId) {
+        if (hasTakenExam(studentId, examId)) {
+            System.out.println("You have already taken this exam.");
+            return;
+        }
+
+        ArrayList<Question> questions = loadQuestions(examId);
+        if (questions.isEmpty()) {
+            System.out.println("No questions found for this exam.");
+            return;
+        }
+
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Starting exam: " + examId);
+        for (Question q : questions) {
+            System.out.println(q.getText());
+            if (q.getOptions() != null && !q.getOptions().isEmpty()) {
+                for (int i = 0; i < q.getOptions().size(); i++) {
+                    System.out.println((i+1) + ". " + q.getOptions().get(i));
+                }
+            }
+            System.out.print("Your answer: ");
+            String answer = sc.nextLine();
+            // Store temporarily
+            tempAnswers.computeIfAbsent(studentId, k -> new HashMap<>()).put(q.getId(), answer);
+        }
+
+        // Submit after all questions
+        saveSubmission(studentId, examId);
+        System.out.println("Exam submitted!");
+    }
+
+    // ------------------------------------------
+    // الحصول على طالب بالـ ID
+    // ------------------------------------------
+    public Student getStudentById(int studentId) {
         for (Student s : loadStudents()) {
-            if (s.getEmail().equals(email) && s.getPassword().equals(password)) {
+            if (s.getId() == studentId) {
                 return s;
             }
         }
@@ -61,8 +112,13 @@ public class StudentService {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty() || line.startsWith("examId")) continue;
-                String[] p = line.split(",", 2);
-                exams.add(new Exam(p[0], p[1],p[2],p[3], Integer.parseInt(p[4])));
+                String[] p = line.split(",");
+                if (p.length >= 2) {
+                    String examId = p[0];
+                    String subject = p[1];
+                    // Use subject as title, subjectId, default lecturer and duration
+                    exams.add(new Exam(examId, subject, subject, "Default Lecturer", 60));
+                }
             }
         } catch (Exception e) {
             System.out.println("Error loading exams");
@@ -77,14 +133,14 @@ public class StudentService {
         ArrayList<Question> questions = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(QUESTIONS_FILE))) {
             String line;
+            int id = 1; // auto increment id
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty() || line.startsWith("examId")) continue;
 
-                // format: examId,questionId,text,correct
-                String[] p = line.split(",", 4);
+                // format: examId,text,correct
+                String[] p = line.split(",", 3);
                 if (p[0].equals(examId)) {
-                    int questionId = Integer.parseInt(p[1]);
-                    questions.add(new Question(questionId, p[2], p[3]));
+                    questions.add(new Question(id++, p[1], p[2]));
                 }
             }
         } catch (Exception e) {

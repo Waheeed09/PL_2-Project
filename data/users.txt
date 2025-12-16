@@ -1,3 +1,4 @@
-1,abdullah,bedohisha,234@,123456
+1,abdullah,bedohisha,234@,student
 2,mohamed,moh@120,123456,admin
-5,moh,hdk@gmail,123456,adimn
+5,moh,hdk@gmail,123456,admin
+6,DrAhmed,ahmed@uni.edu,pass123,lecturer

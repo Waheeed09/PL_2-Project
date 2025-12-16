@@ -1,16 +1,15 @@
 package services;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
 import models.Exam;
 import models.Lecturer;
 import models.Question;
 import models.Student;
-import java.io.FileWriter;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
-import java.io.File;
-import java.io.BufferedReader;
-import java.util.*;
 
 
 public class LecturerService {
@@ -104,17 +103,19 @@ public class LecturerService {
         }
         return score;
     }
-// Gen_report
-    public void generateClassReport(Exam exam, List<Student> students) {
-        if (exam == null || students == null) {
-            throw new IllegalArgumentException("Exam or Students cannot be null");
-        }
+// Delete Exam
+    public void deleteExam(Lecturer lecturer, String examId) {
+        validateLecturer(lecturer);
 
-        System.out.println("Class Report for Exam: " + exam.getTitle());
+        // Simple implementation: remove from file (not implemented fully)
+        System.out.println("Exam deleted by lecturer: " + examId);
+    }
 
-        for (Student student : students) {
-            int grade = calculateGrade(exam, student);
-            System.out.println(student.getName() + " -> " + grade);
-        }
+// View Exams
+    public void viewExams(Lecturer lecturer) {
+        validateLecturer(lecturer);
+
+        // Simple implementation: list exams (not implemented fully)
+        System.out.println("Viewing exams by lecturer");
     }
 }
