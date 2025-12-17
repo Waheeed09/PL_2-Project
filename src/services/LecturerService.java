@@ -252,4 +252,6 @@ public class LecturerService {
         }
         return (correct * 100.0) / examQuestions.size();
     }
+
+    
 }

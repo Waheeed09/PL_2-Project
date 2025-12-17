@@ -264,7 +264,7 @@ public class FileManager {
     public static void saveFeedback(List<Feedback> feedbacks) {
         try (FileWriter fw = new FileWriter(FEEDBACK_FILE)) {
             for (Feedback f : feedbacks) {
-                fw.write(f.getStudentId() + "," + f.getText() + "\n");
+                fw.write(f.getStudentId() + "," + f.getExamId() + "," + f.getText() + "\n");
             }
         } catch (IOException e) {
             System.out.println("Error saving feedback: " + e.getMessage());
@@ -276,9 +276,9 @@ public class FileManager {
         try (BufferedReader br = new BufferedReader(new FileReader(FEEDBACK_FILE))) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",", 2);
-                if (parts.length < 2) continue;
-                feedbacks.add(new Feedback(parts[0], parts[1]));
+                String[] parts = line.split(",", 3);
+                if (parts.length < 3) continue;
+                feedbacks.add(new Feedback(parts[0], parts[1], parts[2]));
             }
         } catch (IOException e) {
             System.out.println("No feedback file found. Starting fresh.");

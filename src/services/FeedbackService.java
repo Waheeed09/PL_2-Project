@@ -1,28 +1,27 @@
 package services;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.util.List;
+import models.Feedback;
 
 public class FeedbackService {
 
-    private static final String FILE_PATH = "feedback.txt";
-
     public static void addFeedback(int studentId, int examId, String message) {
-        try {
-            FileWriter writer = new FileWriter(FILE_PATH, true);
-            writer.write(studentId + "," + examId + "," + message + "\n");
-            writer.close();
-            System.out.println("Feedback saved!");
-        } catch (IOException e) {
-        }}
+        List<Feedback> all = FileManager.loadFeedback();
+        Feedback f = new Feedback(String.valueOf(studentId), String.valueOf(examId), message);
+        all.add(f);
+        FileManager.saveFeedback(all);
+        System.out.println("Feedback saved successfully!");
+    }
 
     public static void listFeedbacks() {
-        Iterable<FeedbackService> feedbackList = null;
-        
-
-    
-    for (FeedbackService f : feedbackList) {
-        System.out.println(f.toString());
-
+        System.out.println("\n--- All Students Feedbacks ---");
+        List<Feedback> all = FileManager.loadFeedback();
+        if (all.isEmpty()) {
+            System.out.println("No feedbacks found yet.");
+            return;
+        }
+        for (Feedback f : all) {
+            System.out.println("Student ID: " + f.getStudentId() + " | Exam ID: " + f.getExamId() + " | Message: " + f.getText());
+        }
     }
-}}
+}

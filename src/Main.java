@@ -4,6 +4,7 @@ import models.Student;
 import models.Subject;
 import models.User;
 import services.AdminService;
+import services.FeedbackService;
 import services.FileManager;
 import services.LecturerService;
 import services.ResultService;
@@ -244,7 +245,6 @@ public class Main {
             System.out.println("2. Add Student");
             System.out.print("Choice: ");
             String c = sc.nextLine();
-
             switch (c) {
                 case "1":
                     studentService.displayStudents();
@@ -274,7 +274,8 @@ public class Main {
                 System.out.println("1. View Profile");
                 System.out.println("2. Take Exam");
                 System.out.println("3. View Results");
-                System.out.println("4. Exit");
+                System.out.println("4. Give Feedback");
+                System.out.println("5. Exit");
                 System.out.print("Choice: ");
                 String c = sc.nextLine();
 
@@ -288,9 +289,11 @@ public class Main {
                         }
                         break;
                     case "2":
-                        System.out.print("Enter Exam ID: ");
-                        String examId = sc.nextLine();
-                        studentService.takeExam(studentId, examId);
+                        {
+                            System.out.print("Enter Exam ID: ");
+                            String examId = sc.nextLine();
+                            studentService.takeExam(studentId, examId);
+                        }
                         break;
                     case "3":
                         System.out.println("\n--- Your Results ---");
@@ -311,7 +314,21 @@ public class Main {
                             }
                         }
                         break;
-                    case "4": exit = true; break;
+                    case "4": {
+                        try {
+                            System.out.print("Enter Exam ID: ");
+                            int examId = Integer.parseInt(sc.nextLine());
+
+                            System.out.print("Enter your feedback message: ");
+                            String msg = sc.nextLine();
+
+                            FeedbackService.addFeedback(studentId, examId, msg);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Error: Exam ID must be a valid number.");
+                        }
+                        break;
+                    }
+                    case "5": exit = true; break;
                     default: System.out.println("Invalid choice");
                 }
             }
