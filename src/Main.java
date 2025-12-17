@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.Scanner;
-import java.util.ArrayList;
 import models.Lecturer;
 import models.Student;
 import models.Subject;
@@ -292,7 +291,8 @@ public class Main {
                 System.out.println("2. Take Exam");
                 System.out.println("3. View Results");
                 System.out.println("4. Give Feedback");
-                System.out.println("5. Exit");
+                System.out.println("5. Request Recorrection");
+                System.out.println("6. Exit");
                 System.out.print("Choice: ");
                 String c = sc.nextLine();
 
@@ -344,7 +344,29 @@ public class Main {
                         }
                         break;
                     }
-                    case "5": exit = true; break;
+                    case "5": {
+                        System.out.print("Enter your recorrection request: ");
+                        String reason = sc.nextLine();
+                        if (!reason.trim().isEmpty()) {
+                            try {
+                                String recorrectionData = studentId + "|" + reason + "|" + System.currentTimeMillis();
+                                java.nio.file.Files.createDirectories(java.nio.file.Paths.get("data"));
+                                java.nio.file.Files.write(
+                                    java.nio.file.Paths.get("data/recorrections.txt"),
+                                    (recorrectionData + "\n").getBytes(),
+                                    java.nio.file.StandardOpenOption.CREATE,
+                                    java.nio.file.StandardOpenOption.APPEND
+                                );
+                                System.out.println("Recorrection request submitted successfully!");
+                            } catch (Exception ex) {
+                                System.out.println("Error submitting recorrection request: " + ex.getMessage());
+                            }
+                        } else {
+                            System.out.println("Recorrection request cannot be empty.");
+                        }
+                        break;
+                    }
+                    case "6": exit = true; break;
                     default: System.out.println("Invalid choice");
                 }
             }

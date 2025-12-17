@@ -1,19 +1,15 @@
 package GUI;
 
-import models.*;
-import services.*;
-
-import javax.swing.*;
 import java.awt.*;
-import java.util.List;
-import java.util.ArrayList;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import javax.swing.table.DefaultTableModel;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.*;
+import models.*;
+import services.*;
 
 public class MainGUI extends JFrame {
     private AdminService adminService;
@@ -556,8 +552,8 @@ public class MainGUI extends JFrame {
         JButton takeExamBtn = new JButton("Take Exam");
         JButton viewResultsBtn = new JButton("View My Results");
         JButton viewSubjectsBtn = new JButton("View My Subjects");
-
-         JButton feedbackBtn = new JButton("Give Feedback");
+        JButton feedbackBtn = new JButton("Give Feedback");
+        JButton recorrectionBtn = new JButton("Request Recorrection");
 
 
         // Take Exam Button
@@ -598,17 +594,22 @@ public class MainGUI extends JFrame {
         });
 
         feedbackBtn.addActionListener(e -> {
-        showFeedbackDialog();
-    });
+            showFeedbackDialog();
+        });
+
+        recorrectionBtn.addActionListener(e -> {
+            Student student = new Student(loggedInUser.getId(), loggedInUser.getName(), loggedInUser.getEmail(), loggedInUser.getPassword());
+            new RecorrectionForm(student);
+        });
 
         // Create button panel
         JPanel buttonPanel = new JPanel();
-    // قمنا بتغيير الرقم من 3 إلى 4 لأننا أضفنا زر جديد
-        buttonPanel.setLayout(new GridLayout(4, 1, 10, 10)); 
+        buttonPanel.setLayout(new GridLayout(5, 1, 10, 10)); 
         buttonPanel.add(takeExamBtn);
         buttonPanel.add(viewResultsBtn);
         buttonPanel.add(viewSubjectsBtn);
-        buttonPanel.add(feedbackBtn); // إضافة الزر للوحة
+        buttonPanel.add(feedbackBtn);
+        buttonPanel.add(recorrectionBtn);
 
         // Add components to parent
         parent.add(Box.createVerticalStrut(20));

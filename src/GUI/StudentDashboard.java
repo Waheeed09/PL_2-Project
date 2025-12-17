@@ -1,11 +1,10 @@
 package GUI;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.List;
-import models.Student;
+import javax.swing.*;
 import models.Exam;
-import models.User;
+import models.Student;
 import services.StudentService;
 
 public class StudentDashboard extends JFrame {
@@ -39,13 +38,15 @@ public class StudentDashboard extends JFrame {
         JScrollPane scrollPane = new JScrollPane(examList);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 3, 5, 5));
 
         JButton btnTakeExam = new JButton("Take Exam");
         JButton btnViewResults = new JButton("View Results");
+        JButton btnRecorrection = new JButton("Request Recorrection");
 
         buttonPanel.add(btnTakeExam);
         buttonPanel.add(btnViewResults);
+        buttonPanel.add(btnRecorrection);
 
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -62,5 +63,9 @@ public class StudentDashboard extends JFrame {
         });
 
         btnViewResults.addActionListener(e -> JOptionPane.showMessageDialog(this, "Feature not implemented yet."));
+
+        btnRecorrection.addActionListener(e -> {
+            new RecorrectionForm(student);
+        });
     }
 }
