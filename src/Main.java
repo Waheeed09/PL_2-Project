@@ -54,6 +54,7 @@ public class Main {
                 break;
             case "student":
                 studentMenu(studentService, adminService, sc, loggedInUser.getId()); 
+                
             case "lecturer":
                 lecturerMenu(sc);
                 break;
@@ -216,7 +217,7 @@ public class Main {
                 adminService.approveAllResults();
                 break;
             case "2":
-                adminService.getResults();
+                adminService.listResults();
                 break;
             default:
                 System.out.println("Invalid choice");
@@ -242,8 +243,19 @@ public class Main {
                     studentService.displayStudents();
                     break;
                 case "2":
-                    System.out.println("Add student not implemented");
-                    break;     
+                    try {
+                        System.out.print("Enter ID: "); int nid = Integer.parseInt(sc.nextLine());
+                        System.out.print("Enter Name: "); String nname = sc.nextLine();
+                        System.out.print("Enter Email: "); String nemail = sc.nextLine();
+                        System.out.print("Enter Password: "); String npass = sc.nextLine();
+                        java.util.ArrayList<Student> cur = studentService.loadStudents();
+                        cur.add(new Student(nid, nname, nemail, npass));
+                        FileManager.saveStudents(cur);
+                        System.out.println("Student added with ID: " + nid);
+                    } catch (NumberFormatException ex) {
+                        System.out.println("Invalid ID. Student not added.");
+                    }
+                    break;
                 default:
                     System.out.println("Invalid choice");
             }

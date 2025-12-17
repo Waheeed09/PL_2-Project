@@ -175,15 +175,19 @@ public class AdminService {
     //  Result Management
     // -------------------
     public List<Result> getResults() {
+        return results;
+    }
+    
+    // Print results to console (separate from getter)
+    public void listResults() {
         if (results.isEmpty()) {
             System.out.println("No results available");
-        } else {
-            System.out.println("Listing all results:");
-            for (Result r : results) {
-                System.out.println(r);
-            }
+            return;
         }
-        return results;
+        System.out.println("Listing all results:");
+        for (Result r : results) {
+            System.out.println(r);
+        }
     }
     public void approveAllResults() {
         if (results.isEmpty()) {
