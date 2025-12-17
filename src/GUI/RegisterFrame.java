@@ -3,18 +3,28 @@ package GUI;
 import javax.swing.*;
 import java.awt.*;
 import services.UserService;
+import services.StudentService;
+import services.LecturerService;
 import models.User;
+import models.Student;
+import models.Lecturer;
 
 public class RegisterFrame extends JFrame {
 
     private UserService userService;
+    private StudentService studentService;
+    private LecturerService lecturerService;
+
     private JTextField txtName, txtEmail, txtId;
     private JPasswordField txtPassword;
     private JComboBox<String> cmbRole;
     private JButton btnRegister, btnBack;
 
-    public RegisterFrame(UserService userService) {
+    public RegisterFrame(UserService userService, StudentService studentService, LecturerService lecturerService) {
         this.userService = userService;
+        this.studentService = studentService;
+        this.lecturerService = lecturerService;
+
         setTitle("Register");
         setSize(400, 250);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -53,31 +63,63 @@ public class RegisterFrame extends JFrame {
         add(panel);
 
         // Action listeners
-        btnRegister.addActionListener(e -> {
-            try {
-                int id = Integer.parseInt(txtId.getText());
-                String name = txtName.getText();
-                String email = txtEmail.getText();
-                String pass = new String(txtPassword.getPassword());
-                String role = cmbRole.getSelectedItem().toString();
+        btnRegister.addActionListener(e -> registerAction());
+        btnBack.addActionListener(e -> backAction());
+    }
 
-                User newUser = new User(id, name, email, pass, role);
-                boolean success = userService.register(newUser);
-                if (success) {
-                    JOptionPane.showMessageDialog(this, "Registration successful!");
-                    new LoginFrame(userService).setVisible(true);
-                    this.dispose();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Email already in use.");
-                }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Invalid ID format.");
+    private void registerAction() {
+        try {
+            int id = Integer.parseInt(txtId.getText().trim());
+            String name = txtName.getText().trim();
+            String email = txtEmail.getText().trim();
+            String pass = new String(txtPassword.getPassword()).trim();
+            String role = cmbRole.getSelectedItem().toString();
+
+            User newUser;
+
+            switch (role) {
+                case "student":
+                    newUser = new Student(id, name, email, pass);
+                    break;
+                case "lecturer":
+                    newUser = new Lecturer(id, name, email, pass);
+                    break;
+                case "admin":
+                    newUser = new User(id, name, email, pass, "admin");
+                    break;
+                default:
+                    JOptionPane.showMessageDialog(this, "Invalid role.");
+                    return;
             }
-        });
 
-        btnBack.addActionListener(e -> {
-            new LoginFrame(userService).setVisible(true);
-            this.dispose();
-        });
+            boolean success = userService.register(newUser);
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Registration successful!");
+                this.dispose();
+
+                // Open dashboard based on role
+                switch (role) {
+                    case "admin":
+                        new AdminDashboard(newUser, studentService, userService).setVisible(true);
+                        break;
+                    case "student":
+                        new StudentDashboard((Student) newUser, studentService).setVisible(true);
+                        break;
+                    case "lecturer":
+                        new LecturerDashboard((Lecturer) newUser, lecturerService).setVisible(true);
+                        break;
+                }
+
+            } else {
+                JOptionPane.showMessageDialog(this, "Email already in use.");
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid ID format.");
+        }
+    }
+
+    private void backAction() {
+        new LoginFrame(userService, studentService, lecturerService).setVisible(true);
+        this.dispose();
     }
 }
