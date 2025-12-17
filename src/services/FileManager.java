@@ -126,6 +126,7 @@ public class FileManager {
     // ------------------- Subjects -------------------
     public static void saveSubjects(List<Subject> subjects) {
         try (FileWriter fw = new FileWriter(SUBJECTS_FILE)) {
+            fw.write("subjectId,subjectName\n");
             for (Subject s : subjects) {
                 fw.write(s.getSubjectId() + "," + s.getSubjectName() + "\n");
             }
@@ -138,7 +139,12 @@ public class FileManager {
         List<Subject> subjects = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(SUBJECTS_FILE))) {
             String line;
+            boolean firstLine = true;
             while ((line = br.readLine()) != null) {
+                if (firstLine) {
+                    firstLine = false;
+                    continue;
+                }
                 String[] parts = line.split(",");
                 if (parts.length < 2) continue;
                 subjects.add(new Subject(parts[0], parts[1]));
@@ -152,8 +158,9 @@ public class FileManager {
     // ------------------- Exams -------------------
     public static void saveExams(List<Exam> exams) {
         try (FileWriter fw = new FileWriter(EXAMS_FILE)) {
+            fw.write("examId,subject\n");
             for (Exam e : exams) {
-                fw.write(e.getExamId() + "," + e.getTitle() + "," + e.getSubjectId() + "," + e.getLecturerId() + "," + e.getDurationMinutes() + "\n");
+                fw.write(e.getExamId() + "," + e.getSubjectId() + "\n");
             }
         } catch (IOException e) {
             System.out.println("Error saving exams: " + e.getMessage());
@@ -164,10 +171,17 @@ public class FileManager {
         List<Exam> exams = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(EXAMS_FILE))) {
             String line;
+            boolean firstLine = true;
             while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length < 5) continue;
-                exams.add(new Exam(parts[0], parts[1], parts[2], parts[3], Integer.parseInt(parts[4])));
+                if (firstLine) {
+                    firstLine = false;
+                    continue;
+                }
+                String[] parts = line.split(",", 2);
+                if (parts.length < 2) continue;
+                String examId = parts[0];
+                String subject = parts[1];
+                exams.add(new Exam(examId, subject, subject, "Default Lecturer", 60));
             }
         } catch (IOException e) {
             System.out.println("No exams file found. Starting fresh.");

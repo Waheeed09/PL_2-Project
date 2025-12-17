@@ -176,21 +176,25 @@ public class Main {
                 System.out.print("Enter Subject ID: "); String id = sc.nextLine();
                 System.out.print("Enter Subject Name: "); String name = sc.nextLine();
                 adminService.addSubject(new Subject(id, name));
+                FileManager.saveSubjects(adminService.getSubjects());
                 break;
             case "2":
                 System.out.print("Enter Subject ID to update: "); String sid = sc.nextLine();
                 System.out.print("New Name (leave blank to skip): "); String sname = sc.nextLine();
                 adminService.updateSubject(sid, sname.isEmpty()?null:sname, null);
+                FileManager.saveSubjects(adminService.getSubjects());
                 break;
             case "3":
                 System.out.print("Enter Subject ID: "); String subId = sc.nextLine();
                 System.out.print("Enter Student ID: "); String stuId = sc.nextLine();
                 adminService.assignSubjectToStudent(subId, stuId);
+                FileManager.saveSubjects(adminService.getSubjects());
                 break;
             case "4":
                 System.out.print("Enter Subject ID: "); String sublId = sc.nextLine();
                 System.out.print("Enter Lecturer Name: "); String lecName = sc.nextLine();
                 adminService.assignSubjectToLecturer(sublId, new Lecturer(0, lecName, "", ""));
+                FileManager.saveSubjects(adminService.getSubjects());
                 break;
             case "5":
                 adminService.listSubjects();

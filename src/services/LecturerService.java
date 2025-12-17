@@ -29,7 +29,7 @@ public class LecturerService {
             throw new IllegalArgumentException("Exam ID and Title cannot be null");
         }
 
-        try (FileWriter writer = new FileWriter("exams.txt", true)) { // true = append
+        try (FileWriter writer = new FileWriter("data/exams.txt", true)) { // true = append
             writer.write(examId + "," + title);
             writer.write(System.lineSeparator());
         } catch (IOException e) {
@@ -48,7 +48,7 @@ public class LecturerService {
             throw new IllegalArgumentException("Exam ID and Title cannot be null");
         }
 
-        File file = new File("exams.txt");
+        File file = new File("data/exams.txt");
         List<String> lines = new ArrayList<>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -107,15 +107,36 @@ public class LecturerService {
     public void deleteExam(Lecturer lecturer, String examId) {
         validateLecturer(lecturer);
 
-        // Simple implementation: remove from file (not implemented fully)
-        System.out.println("Exam deleted by lecturer: " + examId);
+        List<Exam> exams = FileManager.loadExams();
+        boolean found = false;
+        for (int i = 0; i < exams.size(); i++) {
+            Exam exam = exams.get(i);
+            if (exam.getExamId().equals(examId)) {
+                exams.remove(i);
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            FileManager.saveExams(exams);
+            System.out.println("Exam deleted successfully: " + examId);
+        } else {
+            System.out.println("Exam not found.");
+        }
     }
 
 // View Exams
     public void viewExams(Lecturer lecturer) {
         validateLecturer(lecturer);
 
-        // Simple implementation: list exams (not implemented fully)
-        System.out.println("Viewing exams by lecturer");
+        List<Exam> exams = FileManager.loadExams();
+        if (exams.isEmpty()) {
+            System.out.println("No exams found.");
+        } else {
+            System.out.println("Exams:");
+            for (Exam exam : exams) {
+                System.out.println("ID: " + exam.getExamId() + ", Subject: " + exam.getSubjectId());
+            }
+        }
     }
 }
