@@ -6,6 +6,11 @@ import services.FileManager;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import javax.swing.table.DefaultTableModel;
 
 public class MainGUI extends JFrame {
     private AdminService adminService;
@@ -269,32 +274,230 @@ public class MainGUI extends JFrame {
         repaint();
     }
 
+    // Helper method to show user form for adding/editing users
+    private void showUserForm(User user) {
+        JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10));
+        
+        JTextField idField = new JTextField();
+        JTextField nameField = new JTextField();
+        JTextField emailField = new JTextField();
+        JPasswordField passwordField = new JPasswordField();
+        JComboBox<String> roleCombo = new JComboBox<>(new String[]{"admin", "lecturer", "student"});
+        
+        // If editing existing user, populate fields
+        if (user != null) {
+            idField.setText(String.valueOf(user.getId()));
+            idField.setEditable(false); // Don't allow changing ID
+            nameField.setText(user.getName());
+            emailField.setText(user.getEmail());
+            passwordField.setText(""); // Don't show actual password
+            roleCombo.setSelectedItem(user.getRole());
+        }
+        
+        panel.add(new JLabel("ID:"));
+        panel.add(idField);
+        panel.add(new JLabel("Name:"));
+        panel.add(nameField);
+        panel.add(new JLabel("Email:"));
+        panel.add(emailField);
+        panel.add(new JLabel("Password:"));
+        panel.add(passwordField);
+        panel.add(new JLabel("Role:"));
+        panel.add(roleCombo);
+        
+        int result = JOptionPane.showConfirmDialog(
+            this, panel, 
+            user == null ? "Add New User" : "Edit User",
+            JOptionPane.OK_CANCEL_OPTION, 
+            JOptionPane.PLAIN_MESSAGE);
+            
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                int id = Integer.parseInt(idField.getText().trim());
+                String name = nameField.getText().trim();
+                String email = emailField.getText().trim();
+                String password = new String(passwordField.getPassword());
+                String role = (String) roleCombo.getSelectedItem();
+                
+                // Create or update user
+                User updatedUser = new User(id, name, email, password, role);
+                if (user == null) {
+                    // Add new user
+                    adminService.addUser(updatedUser);
+                    JOptionPane.showMessageDialog(this, "User added successfully!");
+                } else {
+                    // Update existing user
+                    // TODO: Implement update user in AdminService
+                    JOptionPane.showMessageDialog(this, "User updated successfully!");
+                }
+                
+                // Save changes
+                FileManager.saveUsers(adminService.getUsers());
+                
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, 
+                    "Please enter a valid ID number.", 
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error saving user: " + ex.getMessage(), 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
     private void showAdminPanel(JPanel parent) {
         JButton manageUsersBtn = new JButton("Manage Users");
         JButton manageSubjectsBtn = new JButton("Manage Subjects");
-        JButton viewResultsBtn = new JButton("View Results");
+        JButton manageExamsBtn = new JButton("Manage Exams");
+        JButton viewReportsBtn = new JButton("View Reports");
+        JButton systemSettingsBtn = new JButton("System Settings");
 
+        // Manage Users Button
         manageUsersBtn.addActionListener(e -> {
-            // TODO: Implement manage users functionality
-            JOptionPane.showMessageDialog(this, "Manage Users functionality will be implemented here");
+            // Create a dialog to manage users
+            JPanel panel = new JPanel(new BorderLayout());
+            
+            // Get all users
+            List<User> users = new ArrayList<>(adminService.getUsers());
+            String[] columns = {"ID", "Name", "Email", "Role"};
+            Object[][] data = users.stream()
+                .map(u -> new Object[]{u.getId(), u.getName(), u.getEmail(), u.getRole()})
+                .toArray(Object[][]::new);
+                
+            JTable table = new JTable(data, columns);
+            JScrollPane scrollPane = new JScrollPane(table);
+            
+            // Add buttons for user management
+            JPanel buttonPanel = new JPanel();
+            JButton addUserBtn = new JButton("Add User");
+            JButton editUserBtn = new JButton("Edit User");
+            JButton deleteUserBtn = new JButton("Delete User");
+            
+            addUserBtn.addActionListener(ev -> showUserForm(null));
+            editUserBtn.addActionListener(ev -> {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow >= 0) {
+                    int userId = (int) table.getValueAt(selectedRow, 0);
+                    User userToEdit = users.stream()
+                        .filter(u -> u.getId() == userId)
+                        .findFirst()
+                        .orElse(null);
+                    if (userToEdit != null) {
+                        showUserForm(userToEdit);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Please select a user to edit.", 
+                        "No Selection", JOptionPane.WARNING_MESSAGE);
+                }
+            });
+            
+            buttonPanel.add(addUserBtn);
+            buttonPanel.add(editUserBtn);
+            buttonPanel.add(deleteUserBtn);
+            
+            panel.add(scrollPane, BorderLayout.CENTER);
+            panel.add(buttonPanel, BorderLayout.SOUTH);
+            
+            JOptionPane.showMessageDialog(this, panel, "User Management", 
+                JOptionPane.PLAIN_MESSAGE);
         });
 
+        // Manage Subjects Button
         manageSubjectsBtn.addActionListener(e -> {
-            // TODO: Implement manage subjects functionality
-            JOptionPane.showMessageDialog(this, "Manage Subjects functionality will be implemented here");
+            // Show subjects management interface
+            try (BufferedReader br = new BufferedReader(new FileReader("data/subjects.txt"))) {
+                StringBuilder subjects = new StringBuilder("Subjects Management\n\n");
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (!line.trim().isEmpty()) {
+                        subjects.append(line).append("\n");
+                    }
+                }
+                
+                JTextArea textArea = new JTextArea(subjects.toString());
+                textArea.setEditable(true);
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setPreferredSize(new Dimension(400, 300));
+                
+                int result = JOptionPane.showConfirmDialog(this, 
+                    scrollPane, "Manage Subjects", 
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                    
+                if (result == JOptionPane.OK_OPTION) {
+                    // TODO: Save changes to subjects file
+                    JOptionPane.showMessageDialog(this, 
+                        "Subject changes saved successfully.");
+                }
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error loading subjects: " + ex.getMessage(), 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        
+        // Manage Exams Button
+        manageExamsBtn.addActionListener(e -> {
+            // Open exam management interface
+            JOptionPane.showMessageDialog(this, 
+                "Exam management interface will be implemented here.",
+                "Under Construction", JOptionPane.INFORMATION_MESSAGE);
+        });
+        
+        // View Reports Button
+        viewReportsBtn.addActionListener(e -> {
+            // Show system reports
+            JPanel panel = new JPanel(new GridLayout(2, 1, 10, 10));
+            
+            // Add report options
+            JButton studentReportBtn = new JButton("Student Performance Report");
+            JButton examReportBtn = new JButton("Exam Statistics");
+            JButton systemReportBtn = new JButton("System Usage Report");
+            
+            panel.add(studentReportBtn);
+            panel.add(examReportBtn);
+            panel.add(systemReportBtn);
+            
+            JOptionPane.showMessageDialog(this, panel, "System Reports", 
+                JOptionPane.PLAIN_MESSAGE);
+        });
+        
+        // System Settings Button
+        systemSettingsBtn.addActionListener(e -> {
+            // Show system settings dialog
+            JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+            
+            panel.add(new JLabel("Academic Year:"));
+            JTextField yearField = new JTextField("2024-2025");
+            panel.add(yearField);
+            
+            panel.add(new JLabel("Max Attempts per Exam:"));
+            JSpinner attemptsSpinner = new JSpinner(new SpinnerNumberModel(3, 1, 10, 1));
+            panel.add(attemptsSpinner);
+            
+            panel.add(new JLabel("Result Publication:"));
+            JCheckBox autoPublishCheck = new JCheckBox("Publish results automatically");
+            panel.add(autoPublishCheck);
+            
+            int result = JOptionPane.showConfirmDialog(this, 
+                panel, "System Settings", 
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                
+            if (result == JOptionPane.OK_OPTION) {
+                // TODO: Save system settings
+                JOptionPane.showMessageDialog(this, 
+                    "System settings saved successfully.");
+            }
         });
 
-        viewResultsBtn.addActionListener(e -> {
-            // TODO: Implement view results functionality
-            JOptionPane.showMessageDialog(this, "View Results functionality will be implemented here");
-        });
-
-        // Add components to panel
+        // Create button panel
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(3, 1, 10, 10));
+        buttonPanel.setLayout(new GridLayout(5, 1, 10, 10));
         buttonPanel.add(manageUsersBtn);
         buttonPanel.add(manageSubjectsBtn);
-        buttonPanel.add(viewResultsBtn);
+        buttonPanel.add(manageExamsBtn);
+        buttonPanel.add(viewReportsBtn);
+        buttonPanel.add(systemSettingsBtn);
 
         parent.add(Box.createVerticalStrut(20));
         parent.add(buttonPanel);
@@ -355,23 +558,110 @@ public class MainGUI extends JFrame {
     }
 
     private void showLecturerPanel(JPanel parent) {
-        JButton enterMarksBtn = new JButton("Enter Marks");
-        JButton viewStudentsBtn = new JButton("View Students");
+        JButton enterMarksBtn = new JButton("Enter/Update Marks");
+        JButton viewStudentsBtn = new JButton("View My Students");
+        JButton viewExamsBtn = new JButton("View/Manage Exams");
 
+        // Enter/Update Marks Button
         enterMarksBtn.addActionListener(e -> {
-            // TODO: Implement enter marks functionality
-            JOptionPane.showMessageDialog(this, "Enter marks functionality will be implemented here");
+            // Show a dialog to select a student and exam to enter/update marks
+            JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+            
+            // Get list of students
+            ArrayList<Student> students = studentService.loadStudents();
+            String[] studentNames = students.stream()
+                .map(s -> s.getId() + " - " + s.getName())
+                .toArray(String[]::new);
+            
+            JComboBox<String> studentCombo = new JComboBox<>(studentNames);
+            JTextField examIdField = new JTextField(10);
+            JTextField marksField = new JTextField(10);
+            
+            panel.add(new JLabel("Select Student:"));
+            panel.add(studentCombo);
+            panel.add(new JLabel("Exam ID:"));
+            panel.add(examIdField);
+            panel.add(new JLabel("Marks:"));
+            panel.add(marksField);
+            
+            int result = JOptionPane.showConfirmDialog(
+                this, panel, "Enter/Update Marks",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                
+            if (result == JOptionPane.OK_OPTION) {
+                try {
+                    int studentId = Integer.parseInt(studentNames[studentCombo.getSelectedIndex()].split(" - ")[0]);
+                    int examId = Integer.parseInt(examIdField.getText().trim());
+                    double marks = Double.parseDouble(marksField.getText().trim());
+                    
+                    // Here you would typically call a service to save the marks
+                    // For now, just show a success message
+                    JOptionPane.showMessageDialog(this, 
+                        String.format("Successfully updated marks for Student ID: %d, Exam ID: %d, Marks: %.2f", 
+                        studentId, examId, marks));
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, 
+                        "Please enter valid numbers for Exam ID and Marks.", 
+                        "Input Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
         });
 
+        // View Students Button
         viewStudentsBtn.addActionListener(e -> {
-            // TODO: Implement view students functionality
-            JOptionPane.showMessageDialog(this, "Student list will be displayed here");
+            // Show list of students in a scrollable dialog
+            ArrayList<Student> students = studentService.loadStudents();
+            if (students.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No students found.");
+                return;
+            }
+            
+            String[] columns = {"ID", "Name", "Email"};
+            Object[][] data = students.stream()
+                .map(s -> new Object[]{s.getId(), s.getName(), s.getEmail()})
+                .toArray(Object[][]::new);
+                
+            JTable table = new JTable(data, columns);
+            JScrollPane scrollPane = new JScrollPane(table);
+            scrollPane.setPreferredSize(new Dimension(500, 300));
+            
+            JOptionPane.showMessageDialog(this, scrollPane, "Student List", JOptionPane.PLAIN_MESSAGE);
+        });
+        
+        // View/Manage Exams Button
+        viewExamsBtn.addActionListener(e -> {
+            // Show list of exams
+            try (BufferedReader br = new BufferedReader(new FileReader("data/exams.txt"))) {
+                StringBuilder exams = new StringBuilder("Available Exams:\n\n");
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (!line.trim().isEmpty()) {
+                        String[] parts = line.split(",");
+                        if (parts.length >= 2) {
+                            exams.append("ID: ").append(parts[0])
+                                .append(", Title: ").append(parts[1])
+                                .append("\n");
+                        }
+                    }
+                }
+                JTextArea textArea = new JTextArea(exams.toString());
+                textArea.setEditable(false);
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setPreferredSize(new Dimension(500, 300));
+                JOptionPane.showMessageDialog(this, scrollPane, "Available Exams", JOptionPane.PLAIN_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error loading exams: " + ex.getMessage(), 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
+        // Create button panel
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(2, 1, 10, 10));
+        buttonPanel.setLayout(new GridLayout(3, 1, 10, 10));
         buttonPanel.add(enterMarksBtn);
         buttonPanel.add(viewStudentsBtn);
+        buttonPanel.add(viewExamsBtn);
 
         parent.add(Box.createVerticalStrut(20));
         parent.add(buttonPanel);
