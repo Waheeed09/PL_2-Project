@@ -8,3 +8,6 @@ EX2,Unit of power?,Watt
 EX3,Translate: Book,Book
 EX3,Translate: Window,Window
 EX3,Write a sentence in English,Hello world
+cs2,2+3,5
+cs2,2+1,3
+cs2,2*2,4

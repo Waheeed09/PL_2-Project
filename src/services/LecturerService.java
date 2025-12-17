@@ -39,6 +39,32 @@ public class LecturerService {
         System.out.println("Exam created by lecturer: " + lecturer.getName());
     }
 
+    // Create exam with questions
+    public void createExamWithQuestions(Lecturer lecturer, String examId, String title, Scanner sc) {
+        validateLecturer(lecturer);
+        createExam(lecturer, examId, title);
+        
+        System.out.println("\n--- Add Questions to Exam ---");
+        System.out.print("How many questions? ");
+        int numQuestions = Integer.parseInt(sc.nextLine());
+        
+        try (FileWriter writer = new FileWriter("data/questions.txt", true)) {
+            for (int i = 0; i < numQuestions; i++) {
+                System.out.println("\n[Question " + (i+1) + "]");
+                System.out.print("Question text: ");
+                String questionText = sc.nextLine();
+                System.out.print("Correct answer: ");
+                String correctAnswer = sc.nextLine();
+                
+                writer.write(examId + "," + questionText + "," + correctAnswer);
+                writer.write(System.lineSeparator());
+                System.out.println("✓ Question added");
+            }
+        } catch (IOException e) {
+            System.out.println("Error saving questions: " + e.getMessage());
+        }
+    }
+
 
 // Modify
     public void modifyExam(Lecturer lecturer, String oldExamId, String newExamId, String newTitle) {
@@ -138,5 +164,28 @@ public class LecturerService {
                 System.out.println("ID: " + exam.getExamId() + ", Subject: " + exam.getSubjectId());
             }
         }
+    }
+
+    // Grade calculator: compare answers with correct ones
+    public double calculateGradeFromSubmission(String examId, String answers) {
+        List<Question> questions = FileManager.loadQuestions();
+        List<Question> examQuestions = new ArrayList<>();
+        for (Question q : questions) {
+            if (q.getExamId().equals(examId)) {
+                examQuestions.add(q);
+            }
+        }
+
+        if (examQuestions.isEmpty()) return 0;
+
+        String[] answerArray = answers.split(";");
+        int correct = 0;
+        for (int i = 0; i < examQuestions.size() && i < answerArray.length; i++) {
+            String studentAnswer = answerArray[i].trim();
+            if (examQuestions.get(i).isCorrectAnswer(studentAnswer)) {
+                correct++;
+            }
+        }
+        return (correct * 100.0) / examQuestions.size();
     }
 }

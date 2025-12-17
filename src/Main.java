@@ -6,6 +6,7 @@ import models.User;
 import services.AdminService;
 import services.FileManager;
 import services.LecturerService;
+import services.ResultService;
 import services.StudentService;
 import services.UserService;
 
@@ -14,12 +15,14 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         AdminService adminService = new AdminService();
         StudentService studentService = new StudentService();
+        ResultService resultService = new ResultService();
         UserService userService;
 
         // Load data from files
         adminService.setUsers(FileManager.loadUsers());
         adminService.setSubjects(FileManager.loadSubjects());
         adminService.setResults(FileManager.loadResults());
+        resultService.getAllResults().addAll(FileManager.loadResults());
         studentService.loadStudents();
 
         userService = new UserService(adminService.getUsers());
@@ -30,6 +33,7 @@ public class Main {
             System.out.println("===== Welcome =====");
             System.out.println("1. Login");
             System.out.println("2. Register");
+            System.out.println("3. Exit");
             System.out.print("Choice: ");
             String choice = sc.nextLine();
 
@@ -42,6 +46,9 @@ public class Main {
                 loggedInUser = register(sc, adminService);
                 FileManager.saveUsers(adminService.getUsers());
                 System.out.println("Registration successful. Logged in as " + loggedInUser.getRole());
+            } else if ("3".equals(choice)) {
+                System.out.println("Exiting...");
+                System.exit(0);
             } else {
                 System.out.println("Invalid choice");
             }
@@ -53,8 +60,8 @@ public class Main {
                 adminMenu(adminService, studentService, sc, loggedInUser);
                 break;
             case "student":
-                studentMenu(studentService, adminService, sc, loggedInUser.getId()); 
-                
+                studentMenu(studentService, adminService, sc, loggedInUser.getId());
+                break;
             case "lecturer":
                 lecturerMenu(sc);
                 break;
@@ -287,16 +294,21 @@ public class Main {
                         break;
                     case "3":
                         System.out.println("\n--- Your Results ---");
-                        var results = adminService.getResults(); 
-                        boolean found = false;
+                        // Need to pass resultService to studentMenu - let's use a different approach
+                        adminService.loadResultsFromFile();
+                        var results = adminService.getResults();
+                        var studentResults = new java.util.ArrayList<>();
                         for (Object res : results) {
-                            if (res.toString().contains("studentId=" + studentId) || res.toString().contains("ID: " + studentId)) {
-                                System.out.println(res);
-                                found = true;
+                            if (res.toString().contains("studentId='" + studentId)) {
+                                studentResults.add(res);
                             }
                         }
-                        if (!found) {
+                        if (studentResults.isEmpty()) {
                             System.out.println("No results found for your ID.");
+                        } else {
+                            for (Object res : studentResults) {
+                                System.out.println(res);
+                            }
                         }
                         break;
                     case "4": exit = true; break;
@@ -328,7 +340,7 @@ public class Main {
                     String examId = sc.nextLine();
                     System.out.print("Enter Exam Title: ");
                     String title = sc.nextLine();
-                    lecturerService.createExam(lecturer, examId, title);
+                    lecturerService.createExamWithQuestions(lecturer, examId, title, sc);
                     break;
                 case "2":
                     System.out.print("Enter Old Exam ID: ");
