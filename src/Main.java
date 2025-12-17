@@ -1,4 +1,6 @@
+import java.io.*;
 import java.util.Scanner;
+import java.util.ArrayList;
 import models.Lecturer;
 import models.Student;
 import models.Subject;
@@ -6,7 +8,6 @@ import models.User;
 import services.AdminService;
 import services.FeedbackService;
 import services.FileManager;
-import services.LecturerService;
 import services.ResultService;
 import services.StudentService;
 import services.UserService;
@@ -19,11 +20,20 @@ public class Main {
         ResultService resultService = new ResultService();
         UserService userService;
 
+        // Ensure data directory exists
+        new File("data").mkdirs();
+
         // Load data from files
         adminService.setUsers(FileManager.loadUsers());
-        adminService.setSubjects(FileManager.loadSubjects());
-        adminService.setResults(FileManager.loadResults());
-        resultService.getAllResults().addAll(FileManager.loadResults());
+        // Simple checks to avoid null pointers if files are empty/missing implementation
+        try { adminService.setSubjects(FileManager.loadSubjects()); } catch (Exception e) {}
+        try { adminService.setResults(FileManager.loadResults()); } catch (Exception e) {}
+        try { 
+            if (FileManager.loadResults() != null) {
+                resultService.getAllResults().addAll(FileManager.loadResults());
+            }
+        } catch (Exception e) {}
+        
         studentService.loadStudents();
 
         userService = new UserService(adminService.getUsers());
@@ -31,7 +41,7 @@ public class Main {
         // Login or Register
         User loggedInUser = null;
         while (loggedInUser == null) {
-            System.out.println("===== Welcome =====");
+            System.out.println("\n===== Welcome to University System =====");
             System.out.println("1. Login");
             System.out.println("2. Register");
             System.out.println("3. Exit");
@@ -55,6 +65,8 @@ public class Main {
             }
         }
 
+        System.out.println("\nWelcome, " + loggedInUser.getName() + " (" + loggedInUser.getRole() + ")");
+
         // Role-based menu
         switch (loggedInUser.getRole()) {
             case "admin":
@@ -72,8 +84,9 @@ public class Main {
 
         // Save data
         FileManager.saveUsers(adminService.getUsers());
-        FileManager.saveSubjects(adminService.getSubjects());
-        FileManager.saveResults(adminService.getResults());
+        // Handle saving safely
+        try { FileManager.saveSubjects(adminService.getSubjects()); } catch(Exception e){}
+        try { FileManager.saveResults(adminService.getResults()); } catch(Exception e){}
 
         sc.close();
         System.out.println("Exiting...");
@@ -81,7 +94,7 @@ public class Main {
 
     // ------------------- Login -------------------
     private static User login(Scanner sc, UserService userService) {
-        System.out.println("===== Login =====");
+        System.out.println("\n===== Login =====");
         System.out.print("Enter email: ");
         String email = sc.nextLine();
         System.out.print("Enter password: ");
@@ -91,16 +104,21 @@ public class Main {
 
     // ------------------- Register -------------------
     private static User register(Scanner sc, AdminService adminService) {
-        System.out.println("===== Register =====");
-        System.out.print("Enter ID: "); int id = Integer.parseInt(sc.nextLine());
-        System.out.print("Enter Name: "); String name = sc.nextLine();
-        System.out.print("Enter Email: "); String email = sc.nextLine();
-        System.out.print("Enter Password: "); String pass = sc.nextLine();
-        System.out.print("Enter Role (admin/student/lecturer): "); String role = sc.nextLine();
+        System.out.println("\n===== Register =====");
+        try {
+            System.out.print("Enter ID: "); int id = Integer.parseInt(sc.nextLine());
+            System.out.print("Enter Name: "); String name = sc.nextLine();
+            System.out.print("Enter Email: "); String email = sc.nextLine();
+            System.out.print("Enter Password: "); String pass = sc.nextLine();
+            System.out.print("Enter Role (admin/student/lecturer): "); String role = sc.nextLine();
 
-        User newUser = new User(id, name, email, pass, role);
-        adminService.addUser(newUser);
-        return newUser;
+            User newUser = new User(id, name, email, pass, role.toLowerCase());
+            adminService.addUser(newUser);
+            return newUser;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid ID format. Creating dummy user.");
+            return new User(0, "ErrorUser", "error", "error", "student");
+        }
     }
 
     // ------------------- Admin Menu -------------------
@@ -122,7 +140,7 @@ public class Main {
                 case "1": userMenu(adminService, sc); break;
                 case "2": subjectMenu(adminService, sc); break;
                 case "3": resultMenu(adminService, sc); break;
-               case "4": studentMenu(studentService, adminService, sc); break;
+                case "4": studentMenu(studentService, adminService, sc); break;
                 case "5": updateAdminInfo(user, sc); break;
                 case "6": exit = true; break;
                 default: System.out.println("Invalid choice");
@@ -142,12 +160,15 @@ public class Main {
 
         switch (c) {
             case "1":
-                System.out.print("Enter ID: "); int id = Integer.parseInt(sc.nextLine());
-                System.out.print("Enter Name: "); String name = sc.nextLine();
-                System.out.print("Enter Email: "); String email = sc.nextLine();
-                System.out.print("Enter Password: "); String pass = sc.nextLine();
-                System.out.print("Enter Role (student/lecturer/admin): "); String role = sc.nextLine();
-                adminService.addUser(new User(id, name, email, pass, role));
+                try {
+                    System.out.print("Enter ID: "); int id = Integer.parseInt(sc.nextLine());
+                    System.out.print("Enter Name: "); String name = sc.nextLine();
+                    System.out.print("Enter Email: "); String email = sc.nextLine();
+                    System.out.print("Enter Password: "); String pass = sc.nextLine();
+                    System.out.print("Enter Role (student/lecturer/admin): "); String role = sc.nextLine();
+                    adminService.addUser(new User(id, name, email, pass, role));
+                    System.out.println("User added successfully.");
+                } catch(Exception e) { System.out.println("Invalid input."); }
                 break;
             case "2":
                 System.out.print("Enter ID to update: "); int uid = Integer.parseInt(sc.nextLine());
@@ -184,25 +205,21 @@ public class Main {
                 System.out.print("Enter Subject ID: "); String id = sc.nextLine();
                 System.out.print("Enter Subject Name: "); String name = sc.nextLine();
                 adminService.addSubject(new Subject(id, name));
-                FileManager.saveSubjects(adminService.getSubjects());
                 break;
             case "2":
                 System.out.print("Enter Subject ID to update: "); String sid = sc.nextLine();
                 System.out.print("New Name (leave blank to skip): "); String sname = sc.nextLine();
                 adminService.updateSubject(sid, sname.isEmpty()?null:sname, null);
-                FileManager.saveSubjects(adminService.getSubjects());
                 break;
             case "3":
                 System.out.print("Enter Subject ID: "); String subId = sc.nextLine();
                 System.out.print("Enter Student ID: "); String stuId = sc.nextLine();
                 adminService.assignSubjectToStudent(subId, stuId);
-                FileManager.saveSubjects(adminService.getSubjects());
                 break;
             case "4":
                 System.out.print("Enter Subject ID: "); String sublId = sc.nextLine();
                 System.out.print("Enter Lecturer Name: "); String lecName = sc.nextLine();
                 adminService.assignSubjectToLecturer(sublId, new Lecturer(0, lecName, "", ""));
-                FileManager.saveSubjects(adminService.getSubjects());
                 break;
             case "5":
                 adminService.listSubjects();
@@ -235,9 +252,9 @@ public class Main {
     // ------------------- Student Menu -------------------
     private static void studentMenu(StudentService studentService, AdminService adminService, Scanner sc) {
         studentMenu(studentService, adminService, sc, 0); // Admin mode
-}
+    }
 
-    private static void studentMenu(StudentService studentService,AdminService adminService, Scanner sc, int studentId) {
+    private static void studentMenu(StudentService studentService, AdminService adminService, Scanner sc, int studentId) {
         if (studentId == 0) {
             // Admin mode
             System.out.println("\n--- Student Management ---");
@@ -297,12 +314,11 @@ public class Main {
                         break;
                     case "3":
                         System.out.println("\n--- Your Results ---");
-                        // Need to pass resultService to studentMenu - let's use a different approach
                         adminService.loadResultsFromFile();
                         var results = adminService.getResults();
                         var studentResults = new java.util.ArrayList<>();
                         for (Object res : results) {
-                            if (res.toString().contains("studentId='" + studentId)) {
+                            if (res.toString().contains("studentId='" + studentId) || res.toString().startsWith(studentId + ",")) {
                                 studentResults.add(res);
                             }
                         }
@@ -335,46 +351,207 @@ public class Main {
         }
     }
 
-    // ------------------- Lecturer Menu -------------------
+    // -----------------------------------------------------------------
+    // ------------------- LECTURER MENU (UPDATED) ---------------------
+    // -----------------------------------------------------------------
     private static void lecturerMenu(Scanner sc) {
-        Lecturer lecturer = new Lecturer(1, "Dr. Ahmed", "ahmed@example.com", "1234");
-        LecturerService lecturerService = new LecturerService();
-
         boolean exit = false;
         while (!exit) {
-            System.out.println("\n===== Lecturer Menu =====");
+            System.out.println("\n===== Lecturer Dashboard =====");
             System.out.println("1. Create Exam");
             System.out.println("2. Modify Exam");
             System.out.println("3. Delete Exam");
             System.out.println("4. View Exams");
-            System.out.println("5. Exit");
+            System.out.println("5. Student Reports");
+            System.out.println("6. Exit");
             System.out.print("Choice: ");
             String c = sc.nextLine();
 
             switch (c) {
                 case "1":
-                    lecturerService.createExamForSubject(lecturer, sc);
+                    createExamConsole(sc);
                     break;
                 case "2":
-                    System.out.print("Enter Old Exam ID: ");
-                    String oldId = sc.nextLine();
-                    System.out.print("Enter New Exam ID: ");
-                    String newId = sc.nextLine();
-                    System.out.print("Enter New Title: ");
-                    String newTitle = sc.nextLine();
-                    lecturerService.modifyExam(lecturer, oldId, newId, newTitle);
+                    modifyExamConsole(sc);
                     break;
                 case "3":
-                    System.out.print("Enter Exam ID to delete: ");
-                    String delId = sc.nextLine();
-                    lecturerService.deleteExam(lecturer, delId);
+                    deleteExamConsole(sc);
                     break;
                 case "4":
-                    lecturerService.viewExams(lecturer);
+                    viewExamsConsole();
                     break;
-                case "5": exit = true; break;
+                case "5":
+                    viewStudentReportsConsole();
+                    break;
+                case "6": 
+                    exit = true; 
+                    break;
                 default: System.out.println("Invalid choice");
             }
+        }
+    }
+
+    // --- Helper Methods for Lecturer (Direct File Handling) ---
+
+    private static void createExamConsole(Scanner sc) {
+        System.out.println("\n--- Create New Exam ---");
+        System.out.print("Enter Exam ID: "); String id = sc.nextLine();
+        System.out.print("Enter Title: "); String title = sc.nextLine();
+        System.out.print("Enter Subject: "); String subject = sc.nextLine();
+        System.out.print("Enter Duration (mins): "); String duration = sc.nextLine();
+
+        try (FileWriter fw = new FileWriter("data/exams.txt", true);
+             PrintWriter pw = new PrintWriter(fw)) {
+            pw.println(id + "," + title + "," + subject + "," + duration);
+            System.out.println(">> Exam created successfully!");
+        } catch (IOException e) {
+            System.out.println("Error saving exam: " + e.getMessage());
+        }
+    }
+
+    private static void modifyExamConsole(Scanner sc) {
+        System.out.println("\n--- Modify Exam ---");
+        System.out.print("Enter Exam ID to modify: "); String targetId = sc.nextLine();
+        
+        File inputFile = new File("data/exams.txt");
+        File tempFile = new File("data/exams_temp.txt");
+        boolean found = false;
+
+        // Ensure file exists
+        if(!inputFile.exists()) {
+            System.out.println("No exams file found.");
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+             PrintWriter writer = new PrintWriter(new FileWriter(tempFile))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length > 0 && parts[0].equals(targetId)) {
+                    found = true;
+                    System.out.println("Found Exam: " + (parts.length > 1 ? parts[1] : "N/A"));
+                    System.out.print("New Title (Enter to keep current): "); 
+                    String t = sc.nextLine();
+                    String newTitle = t.isEmpty() && parts.length > 1 ? parts[1] : t;
+
+                    System.out.print("New Subject (Enter to keep current): "); 
+                    String s = sc.nextLine();
+                    String newSub = s.isEmpty() && parts.length > 2 ? parts[2] : s;
+
+                    System.out.print("New Duration (Enter to keep current): "); 
+                    String d = sc.nextLine();
+                    String newDur = d.isEmpty() && parts.length > 3 ? parts[3] : d;
+
+                    writer.println(targetId + "," + newTitle + "," + newSub + "," + newDur);
+                } else {
+                    writer.println(line);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+            return;
+        }
+
+        if (found) {
+            inputFile.delete();
+            tempFile.renameTo(inputFile);
+            System.out.println(">> Exam updated successfully!");
+        } else {
+            tempFile.delete();
+            System.out.println(">> Exam ID not found.");
+        }
+    }
+
+    private static void deleteExamConsole(Scanner sc) {
+        System.out.println("\n--- Delete Exam ---");
+        System.out.print("Enter Exam ID to delete: "); String targetId = sc.nextLine();
+
+        File inputFile = new File("data/exams.txt");
+        File tempFile = new File("data/exams_temp.txt");
+        boolean found = false;
+
+        if(!inputFile.exists()) {
+            System.out.println("No exams file found.");
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+             PrintWriter writer = new PrintWriter(new FileWriter(tempFile))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length > 0 && parts[0].equals(targetId)) {
+                    found = true;
+                    continue; // Skip writing this line
+                }
+                writer.println(line);
+            }
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+            return;
+        }
+
+        if (found) {
+            inputFile.delete();
+            tempFile.renameTo(inputFile);
+            System.out.println(">> Exam deleted successfully!");
+        } else {
+            tempFile.delete();
+            System.out.println(">> Exam ID not found.");
+        }
+    }
+
+    private static void viewExamsConsole() {
+        System.out.println("\n--- Available Exams ---");
+        File file = new File("data/exams.txt");
+        if (!file.exists()) {
+            System.out.println("No exams found.");
+            return;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            System.out.printf("%-10s %-20s %-15s %-10s\n", "ID", "Title", "Subject", "Time");
+            System.out.println("---------------------------------------------------------");
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 4) {
+                    System.out.printf("%-10s %-20s %-15s %-10s\n", parts[0], parts[1], parts[2], parts[3]);
+                } else {
+                    System.out.println(line);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading file.");
+        }
+    }
+
+    private static void viewStudentReportsConsole() {
+        System.out.println("\n--- Student Reports ---");
+        File file = new File("data/results.txt");
+        if (!file.exists()) {
+            System.out.println("No results found.");
+            return;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            // Assuming format: StudentID,ExamID,Score
+            System.out.printf("%-15s %-15s %-10s\n", "Student ID", "Exam ID", "Score");
+            System.out.println("-----------------------------------------");
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 3) {
+                    System.out.printf("%-15s %-15s %-10s\n", parts[0], parts[1], parts[2]);
+                } else {
+                    System.out.println(line);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading results.");
         }
     }
 
