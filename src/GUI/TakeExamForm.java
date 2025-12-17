@@ -1,10 +1,9 @@
 package GUI;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
-import java.util.List;
-import java.nio.file.*;
-import java.io.IOException;
+import models.Exam;
 import models.Question;
 import services.StudentService;
 
@@ -12,7 +11,6 @@ public class TakeExamForm extends JFrame {
 
     private int studentId;
     private StudentService studentService = new StudentService();
-    private final Path examsFile = Paths.get("d:\\VSC\\CollegeExaminationSystemPage\\PL_2-Project\\data\\exams.txt");
 
     public TakeExamForm(int studentId) {
         this.studentId = studentId;
@@ -20,69 +18,76 @@ public class TakeExamForm extends JFrame {
         setTitle("Take Exam");
         setSize(400, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(null);
+        setLayout(new BorderLayout(10, 10));
 
-        JTextArea area = new JTextArea();
-        area.setEditable(false);
-        JButton btn = new JButton("Show Exams");
+        DefaultListModel<String> listModel = new DefaultListModel<>();
+        JList<String> examsList = new JList<>(listModel);
+        examsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scrollPane = new JScrollPane(examsList);
 
-        btn.setBounds(120, 10, 150, 30);
-        area.setBounds(50, 50, 300, 300);
+        JButton refreshBtn = new JButton("Refresh Exams");
+        JButton startBtn = new JButton("Start Exam");
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        topPanel.add(refreshBtn);
+        topPanel.add(startBtn);
 
-        add(btn);
-        add(area);
+        add(topPanel, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
 
-        btn.addActionListener(e -> {
-            List<String[]> exams = loadExamsFromFile();
-            if (exams.isEmpty()) {
-                area.setText("No exams available!");
+        Runnable refresh = () -> {
+            listModel.clear();
+            ArrayList<Exam> exams = studentService.loadExams();
+            for (Exam ex : exams) {
+                String examId = ex.getExamId();
+                if (examId == null || examId.trim().isEmpty()) {
+                    continue;
+                }
+                if (!studentService.hasTakenExam(studentId, examId)) {
+                    listModel.addElement(examId + " - " + ex.getTitle());
+                }
+            }
+
+            if (listModel.isEmpty()) {
+                listModel.addElement("No available exams.");
+                examsList.setEnabled(false);
+                startBtn.setEnabled(false);
+            } else {
+                examsList.setEnabled(true);
+                startBtn.setEnabled(true);
+                examsList.setSelectedIndex(0);
+            }
+        };
+
+        refreshBtn.addActionListener(e -> refresh.run());
+        startBtn.addActionListener(e -> {
+            String selected = examsList.getSelectedValue();
+            if (selected == null || selected.equals("No available exams.")) {
+                JOptionPane.showMessageDialog(this, "No exam selected.");
                 return;
             }
 
-            StringBuilder sb = new StringBuilder();
-            for (String[] ex : exams) {
-                sb.append(ex[0]).append(" - ").append(ex[1]).append("\n");
+            String examId = selected.split(" - ", 2)[0].trim();
+            if (studentService.hasTakenExam(studentId, examId)) {
+                JOptionPane.showMessageDialog(this, "You have already submitted this exam!");
+                refresh.run();
+                return;
             }
-            area.setText(sb.toString());
-            
 
-            String chosen = JOptionPane.showInputDialog(this, "Enter exam ID from above list:");
-            if (chosen != null) {
-                if (studentService.hasTakenExam(studentId, chosen)) {
-                    JOptionPane.showMessageDialog(this, "You have already submitted this exam!");
-                } else {
-                    startExam(chosen);
-                }
-            }
+            startExam(examId);
+            refresh.run();
         });
+
+        refresh.run();
 
         setVisible(true);
     }
 
-    private List<String[]> loadExamsFromFile() {
-        List<String[]> list = new ArrayList<>();
-        if (!Files.exists(examsFile)) return list;
-        try {
-            List<String> lines = Files.readAllLines(examsFile);
-            boolean headerSkipped = false;
-            for (String line : lines) {
-                if (line == null) continue;
-                line = line.trim();
-                if (line.isEmpty()) continue;
-                if (!headerSkipped) { headerSkipped = true; continue; } // skip header
-                String[] parts = line.split(",", 2);
-                String id = parts.length > 0 ? parts[0].trim() : "";
-                String title = parts.length > 1 ? parts[1].trim() : "";
-                list.add(new String[]{id, title});
-            }
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Failed to read exams file: " + ex.getMessage());
-        }
-        return list;
-    }
-
     private void startExam(String examId) {
         ArrayList<Question> questions = studentService.loadQuestions(examId);
+        if (questions.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No questions found for this exam.");
+            return;
+        }
         for (Question q : questions) {
             String ans = JOptionPane.showInputDialog(this, "Question:\n" + q.getText());
             studentService.answerQuestion(studentId, q.getId(), ans);

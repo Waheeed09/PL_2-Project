@@ -504,15 +504,14 @@ public class MainGUI extends JFrame {
     }
 
     private void showStudentPanel(JPanel parent) {
-        JButton takeExamBtn = new JButton("Take Exam");
+        JButton takeExamBtn = new JButton("Available Exams");
         JButton viewResultsBtn = new JButton("View My Results");
         JButton viewSubjectsBtn = new JButton("View My Subjects");
 
         // Take Exam Button
         takeExamBtn.addActionListener(e -> {
             // Open the TakeExamForm
-            TakeExamForm takeExamForm = new TakeExamForm(loggedInUser.getId());
-            takeExamForm.setVisible(true);
+            new TakeExamForm(loggedInUser.getId());
         });
 
         // View Results Button
@@ -532,17 +531,69 @@ public class MainGUI extends JFrame {
 
         // View Subjects Button
         viewSubjectsBtn.addActionListener(e -> {
-            // Show registered subjects
-            String subjects = studentService.getRegisteredSubjects(loggedInUser.getId());
-            if (subjects.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "You are not registered in any subjects yet.", "My Subjects", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JTextArea textArea = new JTextArea(subjects);
-                textArea.setEditable(false);
-                JScrollPane scrollPane = new JScrollPane(textArea);
-                scrollPane.setPreferredSize(new Dimension(300, 200));
-                JOptionPane.showMessageDialog(this, scrollPane, "My Subjects", JOptionPane.PLAIN_MESSAGE);
-            }
+            JDialog dialog = new JDialog(this, "My Subjects", true);
+            dialog.setSize(520, 420);
+            dialog.setLocationRelativeTo(this);
+            dialog.setLayout(new BorderLayout(10, 10));
+
+            JTextArea registeredArea = new JTextArea();
+            registeredArea.setEditable(false);
+            JScrollPane registeredScroll = new JScrollPane(registeredArea);
+
+            Runnable refreshRegistered = () -> {
+                String subjects = studentService.getRegisteredSubjects(loggedInUser.getId());
+                if (subjects == null || subjects.trim().isEmpty()) {
+                    registeredArea.setText("You are not registered in any subjects yet.\n\nUse the dropdown below to register.");
+                } else {
+                    registeredArea.setText(subjects);
+                }
+            };
+
+            java.util.ArrayList<Subject> allSubjects = studentService.loadAllSubjects();
+            String[] subjectItems = allSubjects.stream()
+                .map(s -> s.getSubjectId() + " - " + s.getSubjectName())
+                .toArray(String[]::new);
+
+            JComboBox<String> subjectCombo = new JComboBox<>(subjectItems);
+            JButton registerBtn = new JButton("Register Subject");
+            JButton closeBtn = new JButton("Close");
+
+            registerBtn.addActionListener(ev -> {
+                int idx = subjectCombo.getSelectedIndex();
+                if (idx < 0 || idx >= allSubjects.size()) {
+                    JOptionPane.showMessageDialog(dialog, "No subject selected.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                Subject selected = allSubjects.get(idx);
+                boolean ok = studentService.registerSubject(
+                    loggedInUser.getId(),
+                    selected.getSubjectId(),
+                    selected.getSubjectName()
+                );
+
+                if (ok) {
+                    JOptionPane.showMessageDialog(dialog, "Subject registered successfully!");
+                } else {
+                    JOptionPane.showMessageDialog(dialog, "You are already registered in this subject (or failed to register).", "Info", JOptionPane.INFORMATION_MESSAGE);
+                }
+                refreshRegistered.run();
+            });
+
+            closeBtn.addActionListener(ev -> dialog.dispose());
+
+            JPanel bottomPanel = new JPanel(new BorderLayout(10, 10));
+            bottomPanel.add(subjectCombo, BorderLayout.CENTER);
+            JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+            actions.add(registerBtn);
+            actions.add(closeBtn);
+            bottomPanel.add(actions, BorderLayout.EAST);
+
+            dialog.add(registeredScroll, BorderLayout.CENTER);
+            dialog.add(bottomPanel, BorderLayout.SOUTH);
+
+            refreshRegistered.run();
+            dialog.setVisible(true);
         });
 
         // Create button panel

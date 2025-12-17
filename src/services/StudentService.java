@@ -8,13 +8,17 @@ import java.util.Scanner;
 import models.Exam;
 import models.Question;
 import models.Student;
+import models.Subject;
 
 public class StudentService {
 
     private final String STUDENTS_FILE = "data/students.txt";
+    private final String SUBJECTS_FILE = "data/subjects.txt";
+    private final String STUDENT_SUBJECTS_FILE = "data/student_subjects.txt";
     private final String EXAMS_FILE = "data/exams.txt";
     private final String QUESTIONS_FILE = "data/questions.txt";
     private final String SUBMISSIONS_FILE = "data/submissions.txt";
+    private final String RESULTS_FILE = "data/results.txt";
 
     // تخزين مؤقت لإجابات الطلاب قبل الحفظ النهائي
     private Map<Integer, Map<Integer, String>> tempAnswers = new HashMap<>();
@@ -44,18 +48,26 @@ public class StudentService {
     // Get student results
     public String getStudentResults(int studentId) {
         StringBuilder results = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader(SUBMISSIONS_FILE))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(RESULTS_FILE))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
-                String[] parts = line.split(",");
-                int subStudentId = Integer.parseInt(parts[0]);
-                if (subStudentId == studentId) {
-                    int examId = Integer.parseInt(parts[1]);
-                    String score = parts[2];
-                    results.append("Exam ID: ").append(examId)
-                           .append(", Score: ").append(score).append("\n");
+                String[] parts = line.split(",", 4);
+                if (parts.length < 3) continue;
+
+                int subStudentId = Integer.parseInt(parts[0].trim());
+                if (subStudentId != studentId) continue;
+
+                String subjectId = parts[1].trim();
+                String grade = parts[2].trim();
+                String approved = parts.length >= 4 ? parts[3].trim() : "";
+
+                results.append("Subject: ").append(subjectId)
+                       .append(", Grade: ").append(grade);
+                if (!approved.isEmpty()) {
+                    results.append(", Approved: ").append(approved);
                 }
+                results.append("\n");
             }
         } catch (Exception e) {
             System.out.println("Error loading student results: " + e.getMessage());
@@ -68,7 +80,7 @@ public class StudentService {
         // This is a simplified version - you might need to adjust based on your data structure
         // Assuming subjects are stored in a file with student_id,subject_id,subject_name
         StringBuilder subjects = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader("data/student_subjects.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(STUDENT_SUBJECTS_FILE))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
@@ -84,6 +96,70 @@ public class StudentService {
             System.out.println("Error loading student subjects: " + e.getMessage());
         }
         return subjects.toString();
+    }
+
+    public ArrayList<Subject> loadAllSubjects() {
+        ArrayList<Subject> subjects = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(SUBJECTS_FILE))) {
+            String line;
+            boolean firstLine = true;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+                if (firstLine) {
+                    firstLine = false;
+                    continue;
+                }
+                String[] parts = line.split(",", 2);
+                if (parts.length < 2) continue;
+                String subjectId = parts[0].trim();
+                String subjectName = parts[1].trim();
+                if (subjectId.isEmpty() || subjectName.isEmpty()) continue;
+                subjects.add(new Subject(subjectId, subjectName));
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading subjects: " + e.getMessage());
+        }
+        return subjects;
+    }
+
+    public boolean registerSubject(int studentId, String subjectId, String subjectName) {
+        if (subjectId == null || subjectId.trim().isEmpty()) return false;
+        if (subjectName == null) subjectName = "";
+
+        if (isSubjectRegistered(studentId, subjectId.trim())) {
+            return false;
+        }
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(STUDENT_SUBJECTS_FILE, true))) {
+            bw.write(studentId + "," + subjectId.trim() + "," + subjectName.trim());
+            bw.newLine();
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error registering subject: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean isSubjectRegistered(int studentId, String subjectId) {
+        try (BufferedReader br = new BufferedReader(new FileReader(STUDENT_SUBJECTS_FILE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] parts = line.split(",", 3);
+                if (parts.length < 2) continue;
+                int sid = Integer.parseInt(parts[0].trim());
+                String subId = parts[1].trim();
+                if (sid == studentId && subId.equalsIgnoreCase(subjectId)) {
+                    return true;
+                }
+            }
+        } catch (FileNotFoundException e) {
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+        return false;
     }
 
     // ------------------------------------------
