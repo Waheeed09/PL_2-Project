@@ -11,6 +11,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import javax.swing.table.DefaultTableModel;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.awt.GridLayout;
 
 public class MainGUI extends JFrame {
     private AdminService adminService;
@@ -504,14 +508,15 @@ public class MainGUI extends JFrame {
     }
 
     private void showStudentPanel(JPanel parent) {
-        JButton takeExamBtn = new JButton("Available Exams");
+        JButton takeExamBtn = new JButton("Take Exam");
         JButton viewResultsBtn = new JButton("View My Results");
         JButton viewSubjectsBtn = new JButton("View My Subjects");
 
         // Take Exam Button
         takeExamBtn.addActionListener(e -> {
             // Open the TakeExamForm
-            new TakeExamForm(loggedInUser.getId());
+            TakeExamForm takeExamForm = new TakeExamForm(loggedInUser.getId());
+            takeExamForm.setVisible(true);
         });
 
         // View Results Button
@@ -531,69 +536,17 @@ public class MainGUI extends JFrame {
 
         // View Subjects Button
         viewSubjectsBtn.addActionListener(e -> {
-            JDialog dialog = new JDialog(this, "My Subjects", true);
-            dialog.setSize(520, 420);
-            dialog.setLocationRelativeTo(this);
-            dialog.setLayout(new BorderLayout(10, 10));
-
-            JTextArea registeredArea = new JTextArea();
-            registeredArea.setEditable(false);
-            JScrollPane registeredScroll = new JScrollPane(registeredArea);
-
-            Runnable refreshRegistered = () -> {
-                String subjects = studentService.getRegisteredSubjects(loggedInUser.getId());
-                if (subjects == null || subjects.trim().isEmpty()) {
-                    registeredArea.setText("You are not registered in any subjects yet.\n\nUse the dropdown below to register.");
-                } else {
-                    registeredArea.setText(subjects);
-                }
-            };
-
-            java.util.ArrayList<Subject> allSubjects = studentService.loadAllSubjects();
-            String[] subjectItems = allSubjects.stream()
-                .map(s -> s.getSubjectId() + " - " + s.getSubjectName())
-                .toArray(String[]::new);
-
-            JComboBox<String> subjectCombo = new JComboBox<>(subjectItems);
-            JButton registerBtn = new JButton("Register Subject");
-            JButton closeBtn = new JButton("Close");
-
-            registerBtn.addActionListener(ev -> {
-                int idx = subjectCombo.getSelectedIndex();
-                if (idx < 0 || idx >= allSubjects.size()) {
-                    JOptionPane.showMessageDialog(dialog, "No subject selected.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                Subject selected = allSubjects.get(idx);
-                boolean ok = studentService.registerSubject(
-                    loggedInUser.getId(),
-                    selected.getSubjectId(),
-                    selected.getSubjectName()
-                );
-
-                if (ok) {
-                    JOptionPane.showMessageDialog(dialog, "Subject registered successfully!");
-                } else {
-                    JOptionPane.showMessageDialog(dialog, "You are already registered in this subject (or failed to register).", "Info", JOptionPane.INFORMATION_MESSAGE);
-                }
-                refreshRegistered.run();
-            });
-
-            closeBtn.addActionListener(ev -> dialog.dispose());
-
-            JPanel bottomPanel = new JPanel(new BorderLayout(10, 10));
-            bottomPanel.add(subjectCombo, BorderLayout.CENTER);
-            JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-            actions.add(registerBtn);
-            actions.add(closeBtn);
-            bottomPanel.add(actions, BorderLayout.EAST);
-
-            dialog.add(registeredScroll, BorderLayout.CENTER);
-            dialog.add(bottomPanel, BorderLayout.SOUTH);
-
-            refreshRegistered.run();
-            dialog.setVisible(true);
+            // Show registered subjects
+            String subjects = studentService.getRegisteredSubjects(loggedInUser.getId());
+            if (subjects.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "You are not registered in any subjects yet.", "My Subjects", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JTextArea textArea = new JTextArea(subjects);
+                textArea.setEditable(false);
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setPreferredSize(new Dimension(300, 200));
+                JOptionPane.showMessageDialog(this, scrollPane, "My Subjects", JOptionPane.PLAIN_MESSAGE);
+            }
         });
 
         // Create button panel
@@ -608,114 +561,229 @@ public class MainGUI extends JFrame {
         parent.add(buttonPanel);
     }
 
-    private void showLecturerPanel(JPanel parent) {
-        JButton enterMarksBtn = new JButton("Enter/Update Marks");
-        JButton viewStudentsBtn = new JButton("View My Students");
-        JButton viewExamsBtn = new JButton("View/Manage Exams");
+     private void showLecturerPanel(JPanel parent) {
+        // تعريف الأزرار المطلوبة
+        JButton createExamBtn = new JButton("Create Exam");
+        JButton modifyExamBtn = new JButton("Modify Exam");
+        JButton deleteExamBtn = new JButton("Delete Exam");
+        JButton viewExamsBtn = new JButton("View Exams");
+        JButton studentReportsBtn = new JButton("Student Reports");
 
-        // Enter/Update Marks Button
-        enterMarksBtn.addActionListener(e -> {
-            // Show a dialog to select a student and exam to enter/update marks
-            JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
-            
-            // Get list of students
-            ArrayList<Student> students = studentService.loadStudents();
-            String[] studentNames = students.stream()
-                .map(s -> s.getId() + " - " + s.getName())
-                .toArray(String[]::new);
-            
-            JComboBox<String> studentCombo = new JComboBox<>(studentNames);
-            JTextField examIdField = new JTextField(10);
-            JTextField marksField = new JTextField(10);
-            
-            panel.add(new JLabel("Select Student:"));
-            panel.add(studentCombo);
-            panel.add(new JLabel("Exam ID:"));
-            panel.add(examIdField);
-            panel.add(new JLabel("Marks:"));
-            panel.add(marksField);
-            
-            int result = JOptionPane.showConfirmDialog(
-                this, panel, "Enter/Update Marks",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-                
+        // 1. Create Exam Logic
+        createExamBtn.addActionListener(e -> {
+            JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
+            JTextField idField = new JTextField();
+            JTextField titleField = new JTextField();
+            JTextField subjectField = new JTextField();
+            JTextField durationField = new JTextField();
+
+            panel.add(new JLabel("Exam ID:")); panel.add(idField);
+            panel.add(new JLabel("Title:")); panel.add(titleField);
+            panel.add(new JLabel("Subject:")); panel.add(subjectField);
+            panel.add(new JLabel("Duration (mins):")); panel.add(durationField);
+
+            int result = JOptionPane.showConfirmDialog(this, panel, "Create New Exam",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
             if (result == JOptionPane.OK_OPTION) {
                 try {
-                    int studentId = Integer.parseInt(studentNames[studentCombo.getSelectedIndex()].split(" - ")[0]);
-                    int examId = Integer.parseInt(examIdField.getText().trim());
-                    double marks = Double.parseDouble(marksField.getText().trim());
+                    String examLine = idField.getText() + "," + titleField.getText() + "," + 
+                                      subjectField.getText() + "," + durationField.getText();
                     
-                    // Here you would typically call a service to save the marks
-                    // For now, just show a success message
-                    JOptionPane.showMessageDialog(this, 
-                        String.format("Successfully updated marks for Student ID: %d, Exam ID: %d, Marks: %.2f", 
-                        studentId, examId, marks));
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, 
-                        "Please enter valid numbers for Exam ID and Marks.", 
-                        "Input Error", JOptionPane.ERROR_MESSAGE);
+                    // Save directly to file
+                    appendToExamsFile(examLine);
+                    JOptionPane.showMessageDialog(this, "Exam Created Successfully!");
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Error creating exam: " + ex.getMessage());
                 }
             }
         });
 
-        // View Students Button
-        viewStudentsBtn.addActionListener(e -> {
-            // Show list of students in a scrollable dialog
-            ArrayList<Student> students = studentService.loadStudents();
-            if (students.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "No students found.");
-                return;
+        // 2. Modify Exam Logic
+        modifyExamBtn.addActionListener(e -> {
+            String oldId = JOptionPane.showInputDialog(this, "Enter Exam ID to Modify:");
+            if (oldId != null && !oldId.isEmpty()) {
+                // البحث عن الامتحان وتعديله
+                modifyExamInFile(oldId);
             }
-            
-            String[] columns = {"ID", "Name", "Email"};
-            Object[][] data = students.stream()
-                .map(s -> new Object[]{s.getId(), s.getName(), s.getEmail()})
-                .toArray(Object[][]::new);
-                
-            JTable table = new JTable(data, columns);
-            JScrollPane scrollPane = new JScrollPane(table);
-            scrollPane.setPreferredSize(new Dimension(500, 300));
-            
-            JOptionPane.showMessageDialog(this, scrollPane, "Student List", JOptionPane.PLAIN_MESSAGE);
         });
-        
-        // View/Manage Exams Button
+
+        // 3. Delete Exam Logic
+        deleteExamBtn.addActionListener(e -> {
+            String delId = JOptionPane.showInputDialog(this, "Enter Exam ID to Delete:");
+            if (delId != null && !delId.isEmpty()) {
+                deleteExamFromFile(delId);
+            }
+        });
+
+        // 4. View Exams Logic
         viewExamsBtn.addActionListener(e -> {
-            // Show list of exams
-            try (BufferedReader br = new BufferedReader(new FileReader("data/exams.txt"))) {
-                StringBuilder exams = new StringBuilder("Available Exams:\n\n");
-                String line;
-                while ((line = br.readLine()) != null) {
-                    if (!line.trim().isEmpty()) {
-                        String[] parts = line.split(",");
-                        if (parts.length >= 2) {
-                            exams.append("ID: ").append(parts[0])
-                                .append(", Title: ").append(parts[1])
-                                .append("\n");
-                        }
-                    }
-                }
-                JTextArea textArea = new JTextArea(exams.toString());
-                textArea.setEditable(false);
-                JScrollPane scrollPane = new JScrollPane(textArea);
-                scrollPane.setPreferredSize(new Dimension(500, 300));
-                JOptionPane.showMessageDialog(this, scrollPane, "Available Exams", JOptionPane.PLAIN_MESSAGE);
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, 
-                    "Error loading exams: " + ex.getMessage(), 
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            ArrayList<String> exams = loadExamsList();
+            if (exams.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No exams found.");
+            } else {
+                JList<String> list = new JList<>(exams.toArray(new String[0]));
+                JOptionPane.showMessageDialog(this, new JScrollPane(list), "All Exams", JOptionPane.PLAIN_MESSAGE);
             }
         });
 
-        // Create button panel
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(3, 1, 10, 10));
-        buttonPanel.add(enterMarksBtn);
-        buttonPanel.add(viewStudentsBtn);
+        // 5. Student Reports Logic
+        studentReportsBtn.addActionListener(e -> {
+             // عرض النتائج من ملف results.txt
+             showStudentReports();
+        });
+
+        // تنسيق الأزرار في الشاشة
+        JPanel buttonPanel = new JPanel(new GridLayout(5, 1, 10, 10));
+        buttonPanel.add(createExamBtn);
+        buttonPanel.add(modifyExamBtn);
+        buttonPanel.add(deleteExamBtn);
         buttonPanel.add(viewExamsBtn);
+        buttonPanel.add(studentReportsBtn);
 
         parent.add(Box.createVerticalStrut(20));
         parent.add(buttonPanel);
+    }
+
+    // ---------------------------------------------------------
+    // Helper Methods for Lecturer Operations (File Handling)
+    // ---------------------------------------------------------
+
+    private void appendToExamsFile(String line) {
+        try (java.io.FileWriter fw = new java.io.FileWriter("data/exams.txt", true);
+             java.io.PrintWriter pw = new java.io.PrintWriter(fw)) {
+            pw.println(line);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void modifyExamInFile(String targetId) {
+        File inputFile = new File("data/exams.txt");
+        File tempFile = new File("data/exams_temp.txt");
+        boolean found = false;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+             java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(tempFile))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length > 0 && parts[0].equals(targetId)) {
+                    found = true;
+                    // Show dialog to enter new data
+                    JTextField titleField = new JTextField(parts.length > 1 ? parts[1] : "");
+                    JTextField subjectField = new JTextField(parts.length > 2 ? parts[2] : "");
+                    JTextField durationField = new JTextField(parts.length > 3 ? parts[3] : "");
+                    
+                    JPanel panel = new JPanel(new GridLayout(3, 2));
+                    panel.add(new JLabel("New Title:")); panel.add(titleField);
+                    panel.add(new JLabel("New Subject:")); panel.add(subjectField);
+                    panel.add(new JLabel("New Duration:")); panel.add(durationField);
+
+                    int result = JOptionPane.showConfirmDialog(this, panel, "Edit Exam " + targetId, JOptionPane.OK_CANCEL_OPTION);
+                    
+                    if (result == JOptionPane.OK_OPTION) {
+                        // Write new line
+                        writer.println(targetId + "," + titleField.getText() + "," + subjectField.getText() + "," + durationField.getText());
+                    } else {
+                        // Keep old line if cancelled
+                        writer.println(line);
+                    }
+                } else {
+                    writer.println(line);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Replace file
+        if (found) {
+            inputFile.delete();
+            tempFile.renameTo(inputFile);
+            JOptionPane.showMessageDialog(this, "Exam updated successfully.");
+        } else {
+            tempFile.delete();
+            JOptionPane.showMessageDialog(this, "Exam ID not found.");
+        }
+    }
+
+    private void deleteExamFromFile(String targetId) {
+        File inputFile = new File("data/exams.txt");
+        File tempFile = new File("data/exams_temp.txt");
+        boolean found = false;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+             java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(tempFile))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length > 0 && parts[0].equals(targetId)) {
+                    found = true; 
+                    continue; // Skip writing this line (Delete)
+                }
+                writer.println(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (found) {
+            inputFile.delete();
+            tempFile.renameTo(inputFile);
+            JOptionPane.showMessageDialog(this, "Exam deleted successfully.");
+        } else {
+            tempFile.delete();
+            JOptionPane.showMessageDialog(this, "Exam ID not found.");
+        }
+    }
+
+    private ArrayList<String> loadExamsList() {
+        ArrayList<String> list = new ArrayList<>();
+        File file = new File("data/exams.txt");
+        if (!file.exists()) return list;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                list.add(line);
+            }
+        } catch (IOException e) { e.printStackTrace(); }
+        return list;
+    }
+
+    private void showStudentReports() {
+        // Read results.txt and show in table
+        File file = new File("data/results.txt");
+        if (!file.exists()) {
+            JOptionPane.showMessageDialog(this, "No results found.");
+            return;
+        }
+
+        ArrayList<String[]> dataList = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                // Assuming result format: StudentID,ExamID,Score
+                dataList.add(line.split(","));
+            }
+        } catch (IOException e) { e.printStackTrace(); }
+
+        String[] columns = {"Student ID", "Exam ID", "Score"};
+        Object[][] data = new Object[dataList.size()][3];
+        for (int i = 0; i < dataList.size(); i++) {
+            String[] row = dataList.get(i);
+            if (row.length >= 3) {
+                data[i][0] = row[0];
+                data[i][1] = row[1];
+                data[i][2] = row[2];
+            }
+        }
+
+        JTable table = new JTable(data, columns);
+        JOptionPane.showMessageDialog(this, new JScrollPane(table), "Student Reports", JOptionPane.PLAIN_MESSAGE);
     }
 
     public static void main(String[] args) {
