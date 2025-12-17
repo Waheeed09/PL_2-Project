@@ -1,7 +1,4 @@
 package GUI;
-
-public class AdminDashboard {
-    package GUI;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -11,7 +8,7 @@ import javafx.stage.Stage;
 import models.*;
 import services.*;
 import services.FileManager;
-public class AdminDashboard extends Application {
+public class AdminDashboard {
     private AdminService adminService;
     private StudentService studentService;
     private TextArea outputArea;
@@ -164,5 +161,4 @@ public class AdminDashboard extends Application {
         launch(args);
     }
 }
-
 }
