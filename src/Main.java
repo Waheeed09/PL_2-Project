@@ -270,19 +270,19 @@ public class Main {
                         studentService.takeExam(studentId, examId);
                         break;
                     case "3":
-                    System.out.println("\n--- Your Results ---");
-                    var results = adminService.getResults(); 
-                    boolean found = false;
-                    for (Object res : results) {
-                        if (res.toString().contains("studentId=" + studentId) || res.toString().contains("ID: " + studentId)) {
-                            System.out.println(res);
-                            found = true;
+                        System.out.println("\n--- Your Results ---");
+                        var results = adminService.getResults(); 
+                        boolean found = false;
+                        for (Object res : results) {
+                            if (res.toString().contains("studentId=" + studentId) || res.toString().contains("ID: " + studentId)) {
+                                System.out.println(res);
+                                found = true;
+                            }
                         }
-                    }
-                    if (!found) {
-                        System.out.println("No results found for your ID.");
-                    }
-                    break;
+                        if (!found) {
+                            System.out.println("No results found for your ID.");
+                        }
+                        break;
                     case "4": exit = true; break;
                     default: System.out.println("Invalid choice");
                 }
