@@ -74,5 +74,8 @@ public class TakeExamForm extends JFrame {
     studentService.saveSubmission(studentId, examId);
     JOptionPane.showMessageDialog(this, "Exam submitted!");
 }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new TakeExamForm(1));
+    }
 
 }
