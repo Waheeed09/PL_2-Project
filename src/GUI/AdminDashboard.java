@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 import models.*;
 import services.*;
 import services.FileManager;
-public class AdminDashboard {
+public class AdminDashboard extends Application {
     private AdminService adminService;
     private StudentService studentService;
     private TextArea outputArea;
@@ -160,5 +160,4 @@ public class AdminDashboard {
     public static void main(String[] args) {
         launch(args);
     }
-}
 }
