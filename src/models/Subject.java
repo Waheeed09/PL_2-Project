@@ -9,6 +9,7 @@ public class Subject {
      private String subjectId;
     private String subjectName;
     private Lecturer lecturer; // ممكن يكون null
+    private int lecturerId; // fallback id when Lecturer object not set
     private List<String> enrolledStudents;
 
     public Subject(String subjectId, String subjectName) {
@@ -16,6 +17,7 @@ public class Subject {
         this.subjectName = subjectName;
         this.enrolledStudents = new ArrayList<>();
         this.lecturer = null; // افتراضي
+        this.lecturerId = 0;
     }
 
 
@@ -46,7 +48,13 @@ public class Subject {
 
     // Get lecturer ID easily
     public int getLecturerId() {
-        return lecturer.getId();   // ID inherited from User
+        if (lecturer != null) return lecturer.getId();
+        return lecturerId;
+    }
+
+    public void setLecturerId(int lecturerId) {
+        this.lecturerId = lecturerId;
+        this.lecturer = null; // clear object reference when id set externally
     }
 
     public List<String> getEnrolledStudents() {
@@ -64,6 +72,10 @@ public class Subject {
         }
     }
     public void removeStudent(int studentId) {
+        enrolledStudents.remove(String.valueOf(studentId));
+    }
+
+    public void removeStudent(String studentId) {
         enrolledStudents.remove(studentId);
     }
 

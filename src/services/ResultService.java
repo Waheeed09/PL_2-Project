@@ -14,8 +14,7 @@ public class ResultService {
 
     // ================= Add Result =================
     public void addResult(Result result) {
-        if (result != null) {
-            // تحديد حالة الموافقة تلقائياً (نجاح إذا grade >= 50)
+        if (result != null) {          
             if (result.getGrade() >= 50) {
                 result.setApproved(true);
             }
