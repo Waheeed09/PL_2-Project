@@ -2,31 +2,31 @@ package GUI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
-
 import models.User;
 import models.Student;
 import models.Lecturer;
+import services.StudentService;
 import services.UserService;
 
 public class AdminDashboard extends JFrame {
 
     private User admin;
+    private StudentService studentService;
     private UserService userService;
 
     private DefaultListModel<String> userListModel;
     private JList<String> userList;
     private List<User> users;
 
-    // ======= الكونستركتور =======
-    public AdminDashboard(User admin) {
+    public AdminDashboard(User admin, StudentService studentService, UserService userService) {
         this.admin = admin;
-        this.userService = new UserService(new ArrayList<>()); // users list empty initially
-        this.users = userService.getAllUsers(); // قائمة المستخدمين الفعلية
+        this.studentService = studentService;
+        this.userService = userService;
+        this.users = userService.getAllUsers();
 
         setTitle("Admin Dashboard - " + admin.getName());
-        setSize(600, 400);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 

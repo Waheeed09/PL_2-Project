@@ -204,16 +204,26 @@ public class FileManager {
         List<Question> questions = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(QUESTIONS_FILE))) {
             String line;
+            int qid = 1; // auto-increment ID
+            boolean firstLine = true;
             while ((line = br.readLine()) != null) {
+                // Skip header
+                if (firstLine) {
+                    firstLine = false;
+                    continue;
+                }
+                // Format: examId,questionText,correctAnswer
                 String[] parts = line.split(",", 3);
                 if (parts.length < 3) continue;
                 try {
-                    int qid = Integer.parseInt(parts[0]);
-                    Question q = new Question(qid, parts[2], "");
-                    q.setExamId(parts[1]);
+                    String examId = parts[0];
+                    String questionText = parts[1];
+                    String correctAnswer = parts[2];
+                    Question q = new Question(qid++, questionText, correctAnswer);
+                    q.setExamId(examId);
                     questions.add(q);
-                } catch (NumberFormatException ex) {
-                    // skip malformed id
+                } catch (Exception ex) {
+                    // skip malformed
                 }
             }
         } catch (IOException e) {

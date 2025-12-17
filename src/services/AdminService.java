@@ -223,5 +223,10 @@ public void setSubjects(List<Subject> subjects) {
 public void setResults(List<Result> results) {
     this.results = results;
 }
+
+// Load results from file
+public void loadResultsFromFile() {
+    this.results = FileManager.loadResults();
+}
     
 }

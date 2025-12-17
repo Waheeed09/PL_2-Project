@@ -165,10 +165,13 @@ public class StudentService {
 
         Map<Integer, String> answers = tempAnswers.get(studentId);
 
-        // format: studentId,examId,questionId1|answer1;questionId2|answer2;...
+        // format: studentId,examId,answer1;answer2;answer3;...
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<Integer, String> entry : answers.entrySet()) {
-            sb.append(entry.getKey()).append("|").append(entry.getValue()).append(";");
+        for (int i = 1; i <= answers.size(); i++) {
+            if (answers.containsKey(i)) {
+                if (sb.length() > 0) sb.append(";");
+                sb.append(answers.get(i));
+            }
         }
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(SUBMISSIONS_FILE, true))) {
@@ -177,6 +180,31 @@ public class StudentService {
         } catch (Exception e) {
             System.out.println("Error saving submission");
         }
+
+        // حساب الدرجة وحفظ النتيجة
+        String answers_str = sb.toString();
+        LecturerService lecturerService = new LecturerService();
+        double grade = lecturerService.calculateGradeFromSubmission(examId, answers_str);
+        
+        // Get subjectId from exam
+        String subjectId = examId; // Use examId as subject for now (can be improved)
+        ArrayList<Exam> exams = loadExams();
+        for (Exam e : exams) {
+            if (e.getExamId().equals(examId)) {
+                subjectId = e.getSubjectId();
+                break;
+            }
+        }
+        
+        // Save result to results.txt in correct format: studentId,subjectId,grade,approved
+        try (FileWriter fw = new FileWriter("data/results.txt", true)) {
+            boolean approved = grade >= 50;
+            fw.write(studentId + "," + subjectId + "," + grade + "," + approved + "\n");
+        } catch (Exception e) {
+            System.out.println("Error saving result: " + e.getMessage());
+        }
+        
+        System.out.println("✓ Grade recorded: " + String.format("%.2f", grade) + "%");
 
         // مسح مؤقت بعد الحفظ
         tempAnswers.remove(studentId);
