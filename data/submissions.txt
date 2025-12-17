@@ -3,3 +3,5 @@
 5,EX2,force is push;3*10^8;watt
 1,EX3,null|null|null
 1,EX2,null|null|null
+101,EX1,1|4;2|2;3|12;
+101,EX2,1|hehe;2|25;3|cs;
