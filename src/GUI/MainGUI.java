@@ -2,7 +2,7 @@ package GUI;
 
 import models.*;
 import services.*;
-import services.FileManager;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -14,7 +14,6 @@ import javax.swing.table.DefaultTableModel;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.awt.GridLayout;
 
 public class MainGUI extends JFrame {
     private AdminService adminService;
@@ -278,6 +277,52 @@ public class MainGUI extends JFrame {
         repaint();
     }
 
+    private void showFeedbackDialog() {
+        // إنشاء لوحة الإدخال
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        
+        // حقل إدخال رقم الامتحان
+        JPanel inputPanel = new JPanel(new GridLayout(1, 2, 5, 5));
+        inputPanel.add(new JLabel("Exam ID:"));
+        JTextField examIdField = new JTextField();
+        inputPanel.add(examIdField);
+        
+        // حقل إدخال الملاحظة
+        JTextArea feedbackArea = new JTextArea(5, 20);
+        feedbackArea.setLineWrap(true);
+        JScrollPane scrollPane = new JScrollPane(feedbackArea);
+        
+        panel.add(inputPanel, BorderLayout.NORTH);
+        panel.add(new JLabel("Your Feedback:"), BorderLayout.CENTER); // تسمية توضيحية
+        panel.add(scrollPane, BorderLayout.SOUTH);
+
+        // عرض النافذة المنبثقة
+        int result = JOptionPane.showConfirmDialog(this, panel, "Submit Feedback",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            String examId = examIdField.getText().trim();
+            String message = feedbackArea.getText().trim();
+
+            if (examId.isEmpty() || message.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            try {
+                // التأكد أن رقم الامتحان رقم صحيح
+                int examIdInt = Integer.parseInt(examId);
+
+                // استخدام FeedbackService لحفظ الفيدباك
+                FeedbackService.addFeedback(loggedInUser.getId(), examIdInt, message);
+                
+                JOptionPane.showMessageDialog(this, "Feedback submitted successfully!");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Exam ID must be a number.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
     // Helper method to show user form for adding/editing users
     private void showUserForm(User user) {
         JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10));
@@ -512,6 +557,9 @@ public class MainGUI extends JFrame {
         JButton viewResultsBtn = new JButton("View My Results");
         JButton viewSubjectsBtn = new JButton("View My Subjects");
 
+         JButton feedbackBtn = new JButton("Give Feedback");
+
+
         // Take Exam Button
         takeExamBtn.addActionListener(e -> {
             // Open the TakeExamForm
@@ -549,12 +597,18 @@ public class MainGUI extends JFrame {
             }
         });
 
+        feedbackBtn.addActionListener(e -> {
+        showFeedbackDialog();
+    });
+
         // Create button panel
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(3, 1, 10, 10));
+    // قمنا بتغيير الرقم من 3 إلى 4 لأننا أضفنا زر جديد
+        buttonPanel.setLayout(new GridLayout(4, 1, 10, 10)); 
         buttonPanel.add(takeExamBtn);
         buttonPanel.add(viewResultsBtn);
         buttonPanel.add(viewSubjectsBtn);
+        buttonPanel.add(feedbackBtn); // إضافة الزر للوحة
 
         // Add components to parent
         parent.add(Box.createVerticalStrut(20));
