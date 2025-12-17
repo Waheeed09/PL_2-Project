@@ -240,7 +240,7 @@ public class Main {
                     break;
                 case "2":
                     System.out.println("Add student not implemented");
-                    break;
+                    break;     
                 default:
                     System.out.println("Invalid choice");
             }

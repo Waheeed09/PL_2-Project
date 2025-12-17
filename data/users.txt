@@ -9,4 +9,6 @@
 12,ibrem,ib@,123,admin
 1,dr peter,a7a@,1234,lecturer
 1,dr hema,ham@,123,lecturer
-21,dr habdullah,abd@,12345,student
+12,omar,m@,123,student
+11,check,che@12,123,admin
+12,student,std@,123,student
