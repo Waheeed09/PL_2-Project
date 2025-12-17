@@ -336,11 +336,7 @@ public class Main {
 
             switch (c) {
                 case "1":
-                    System.out.print("Enter Exam ID: ");
-                    String examId = sc.nextLine();
-                    System.out.print("Enter Exam Title: ");
-                    String title = sc.nextLine();
-                    lecturerService.createExamWithQuestions(lecturer, examId, title, sc);
+                    lecturerService.createExamForSubject(lecturer, sc);
                     break;
                 case "2":
                     System.out.print("Enter Old Exam ID: ");

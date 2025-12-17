@@ -39,7 +39,70 @@ public class LecturerService {
         System.out.println("Exam created by lecturer: " + lecturer.getName());
     }
 
-    // Create exam with questions
+    // Create exam for a specific subject
+    public void createExamForSubject(Lecturer lecturer, Scanner sc) {
+        validateLecturer(lecturer);
+        
+        List<String> subjects = FileManager.loadSubjects().stream()
+                .map(s -> s.getSubjectId() + " - " + s.getSubjectName())
+                .toList();
+        
+        if (subjects.isEmpty()) {
+            System.out.println("No subjects available. Admin must create subjects first.");
+            return;
+        }
+        
+        System.out.println("\n--- Available Subjects ---");
+        for (int i = 0; i < subjects.size(); i++) {
+            System.out.println((i + 1) + ". " + subjects.get(i));
+        }
+        
+        System.out.print("Select subject (number): ");
+        int choice = Integer.parseInt(sc.nextLine()) - 1;
+        if (choice < 0 || choice >= subjects.size()) {
+            System.out.println("Invalid choice");
+            return;
+        }
+        
+        String subjectId = subjects.get(choice).split(" - ")[0];
+        
+        System.out.print("Enter Exam ID: ");
+        String examId = sc.nextLine();
+        System.out.print("Enter Exam Title: ");
+        String title = sc.nextLine();
+        
+        // Save exam with subjectId
+        try (FileWriter writer = new FileWriter("data/exams.txt", true)) {
+            writer.write(examId + "," + subjectId + "\n");
+        } catch (IOException e) {
+            System.out.println("Error saving exam");
+            return;
+        }
+        
+        System.out.println("✓ Exam created for subject: " + subjectId);
+        
+        // Add questions
+        System.out.println("\n--- Add Questions to Exam ---");
+        System.out.print("How many questions? ");
+        int numQuestions = Integer.parseInt(sc.nextLine());
+        
+        try (FileWriter writer = new FileWriter("data/questions.txt", true)) {
+            for (int i = 0; i < numQuestions; i++) {
+                System.out.println("\n[Question " + (i+1) + "]");
+                System.out.print("Question text: ");
+                String questionText = sc.nextLine();
+                System.out.print("Correct answer: ");
+                String correctAnswer = sc.nextLine();
+                
+                writer.write(examId + "," + questionText + "," + correctAnswer + "\n");
+                System.out.println("✓ Question added");
+            }
+        } catch (IOException e) {
+            System.out.println("Error saving questions: " + e.getMessage());
+        }
+    }
+
+    // Create exam with questions (old method - keeps backward compatibility)
     public void createExamWithQuestions(Lecturer lecturer, String examId, String title, Scanner sc) {
         validateLecturer(lecturer);
         createExam(lecturer, examId, title);
@@ -47,6 +110,7 @@ public class LecturerService {
         System.out.println("\n--- Add Questions to Exam ---");
         System.out.print("How many questions? ");
         int numQuestions = Integer.parseInt(sc.nextLine());
+        
         
         try (FileWriter writer = new FileWriter("data/questions.txt", true)) {
             for (int i = 0; i < numQuestions; i++) {
