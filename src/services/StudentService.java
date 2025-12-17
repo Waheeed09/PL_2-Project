@@ -41,8 +41,53 @@ public class StudentService {
         return students;
     }
 
+    // Get student results
+    public String getStudentResults(int studentId) {
+        StringBuilder results = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new FileReader(SUBMISSIONS_FILE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] parts = line.split(",");
+                int subStudentId = Integer.parseInt(parts[0]);
+                if (subStudentId == studentId) {
+                    int examId = Integer.parseInt(parts[1]);
+                    String score = parts[2];
+                    results.append("Exam ID: ").append(examId)
+                           .append(", Score: ").append(score).append("\n");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading student results: " + e.getMessage());
+        }
+        return results.toString();
+    }
+
+    // Get registered subjects for a student
+    public String getRegisteredSubjects(int studentId) {
+        // This is a simplified version - you might need to adjust based on your data structure
+        // Assuming subjects are stored in a file with student_id,subject_id,subject_name
+        StringBuilder subjects = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new FileReader("data/student_subjects.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] parts = line.split(",");
+                if (parts.length >= 3 && Integer.parseInt(parts[0]) == studentId) {
+                    subjects.append("-").append(parts[2]).append("\n");
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // File doesn't exist yet - no subjects registered
+            return "";
+        } catch (Exception e) {
+            System.out.println("Error loading student subjects: " + e.getMessage());
+        }
+        return subjects.toString();
+    }
+
     // ------------------------------------------
-    // عرض الطلاب
+    // Display Students
     // ------------------------------------------
     public void displayStudents() {
         ArrayList<Student> students = loadStudents();
