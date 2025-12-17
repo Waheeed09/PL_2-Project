@@ -10,3 +10,6 @@
 1,dr peter,a7a@,1234,lecturer
 1,dr hema,ham@,123,lecturer
 21,dr habdullah,abd@,12345,student
+101,ahmed,test@,12345,student
+202,peter,test1@,14789,student
+303,basel,test@3,456,admin

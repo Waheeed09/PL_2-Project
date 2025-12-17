@@ -53,8 +53,7 @@ public class Main {
                 adminMenu(adminService, studentService, sc, loggedInUser);
                 break;
             case "student":
-                studentMenu(studentService, sc, loggedInUser.getId());
-                break;
+                studentMenu(studentService, adminService, sc, loggedInUser.getId()); 
             case "lecturer":
                 lecturerMenu(sc);
                 break;
@@ -114,7 +113,7 @@ public class Main {
                 case "1": userMenu(adminService, sc); break;
                 case "2": subjectMenu(adminService, sc); break;
                 case "3": resultMenu(adminService, sc); break;
-                case "4": studentMenu(studentService, sc); break;
+               case "4": studentMenu(studentService, adminService, sc); break;
                 case "5": updateAdminInfo(user, sc); break;
                 case "6": exit = true; break;
                 default: System.out.println("Invalid choice");
@@ -225,11 +224,11 @@ public class Main {
     }
 
     // ------------------- Student Menu -------------------
-    private static void studentMenu(StudentService studentService, Scanner sc) {
-        studentMenu(studentService, sc, 0); // Admin mode
-    }
+    private static void studentMenu(StudentService studentService, AdminService adminService, Scanner sc) {
+        studentMenu(studentService, adminService, sc, 0); // Admin mode
+}
 
-    private static void studentMenu(StudentService studentService, Scanner sc, int studentId) {
+    private static void studentMenu(StudentService studentService,AdminService adminService, Scanner sc, int studentId) {
         if (studentId == 0) {
             // Admin mode
             System.out.println("\n--- Student Management ---");
@@ -244,7 +243,7 @@ public class Main {
                     break;
                 case "2":
                     System.out.println("Add student not implemented");
-                    break;
+                    break;     
                 default:
                     System.out.println("Invalid choice");
             }
@@ -275,7 +274,18 @@ public class Main {
                         studentService.takeExam(studentId, examId);
                         break;
                     case "3":
-                        System.out.println("Results: (Not implemented yet)");
+                        System.out.println("\n--- Your Results ---");
+                        var results = adminService.getResults(); 
+                        boolean found = false;
+                        for (Object res : results) {
+                            if (res.toString().contains("studentId=" + studentId) || res.toString().contains("ID: " + studentId)) {
+                                System.out.println(res);
+                                found = true;
+                            }
+                        }
+                        if (!found) {
+                            System.out.println("No results found for your ID.");
+                        }
                         break;
                     case "4": exit = true; break;
                     default: System.out.println("Invalid choice");
