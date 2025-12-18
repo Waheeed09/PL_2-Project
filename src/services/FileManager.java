@@ -193,7 +193,7 @@ public class FileManager {
     public static void saveQuestions(List<Question> questions) {
         try (FileWriter fw = new FileWriter(QUESTIONS_FILE)) {
             for (Question q : questions) {
-                fw.write(q.getQuestionId() + "," + q.getExamId() + "," + q.getText() + "\n");
+                fw.write(q.getExamId() + "," + q.getText() + "," + q.getCorrectAnswer() + "\n");
             }
         } catch (IOException e) {
             System.out.println("Error saving questions: " + e.getMessage());

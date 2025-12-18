@@ -843,7 +843,7 @@ public class MainGUI extends JFrame {
         if (result == JOptionPane.OK_OPTION) {
             if (nameField.getText().trim().isEmpty() || emailField.getText().trim().isEmpty() || 
                 passwordField.getPassword().length == 0) {
-                JOptionPane.showMessageDialog(this, "❌ All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -854,7 +854,7 @@ public class MainGUI extends JFrame {
 
             // Save to file
             FileManager.saveUsers(adminService.getUsers());
-            JOptionPane.showMessageDialog(this, "✅ User updated successfully!");
+            JOptionPane.showMessageDialog(this, "User updated successfully!");
         }
     }
 

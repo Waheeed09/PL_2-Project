@@ -7,6 +7,8 @@ import java.nio.file.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Arrays;
+import models.Question;
+import services.FileManager;
 
 public class CreateExamForm {
     private JFrame frame;
@@ -121,7 +123,7 @@ public class CreateExamForm {
             return;
         }
         
-        java.util.List<models.Question> questions = new java.util.ArrayList<>();
+        java.util.List<Question> questions = new java.util.ArrayList<>();
         int questionId = 1; // Start from 1 for this exam
         
         for (int i = 0; i < numQuestions; i++) {
@@ -148,14 +150,14 @@ public class CreateExamForm {
                 continue;
             }
             
-            models.Question q = new models.Question(questionId++, qText, ans);
+            Question q = new Question(questionId++, qText, ans);
             q.setExamId(examId);
             questions.add(q);
         }
         
         if (!questions.isEmpty()) {
             // Save questions using FileManager
-            services.FileManager.saveQuestions(questions);
+            FileManager.saveQuestions(questions);
             JOptionPane.showMessageDialog(frame, "Questions added successfully!");
         }
     }
