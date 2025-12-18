@@ -10,8 +10,8 @@ import java.util.Arrays;
 
 public class CreateExamForm {
     private JFrame frame;
-    private final Path subjectsFile = Paths.get("d:\\VSC\\CollegeExaminationSystemPage\\PL_2-Project\\data\\subjects.txt");
-    private final Path examsFile = Paths.get("d:\\VSC\\CollegeExaminationSystemPage\\PL_2-Project\\data\\exams.txt");
+    private final Path subjectsFile = Paths.get("data/subjects.txt");
+    private final Path examsFile = Paths.get("data/exams.txt");
 
     public CreateExamForm() {
         frame = new JFrame("Create Exam");
@@ -72,7 +72,11 @@ public class CreateExamForm {
                     Files.write(examsFile, Arrays.asList("examId,subject"), StandardOpenOption.CREATE);
                 }
                 Files.write(examsFile, Arrays.asList(line), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-                JOptionPane.showMessageDialog(frame, "Exam saved to exams.txt");
+                JOptionPane.showMessageDialog(frame, "Exam created successfully! Now add questions.");
+                
+                // Open dialog to add questions
+                addQuestionsToExam(examId);
+                
                 frame.dispose();
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(frame, "Failed to write exams file: " + ex.getMessage());
@@ -102,6 +106,57 @@ public class CreateExamForm {
             }
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(frame, "Failed to read subjects file: " + ex.getMessage());
+        }
+    }
+
+    private void addQuestionsToExam(String examId) {
+        // Ask for number of questions
+        String numStr = JOptionPane.showInputDialog(frame, "How many questions to add?");
+        if (numStr == null || numStr.trim().isEmpty()) return;
+        int numQuestions;
+        try {
+            numQuestions = Integer.parseInt(numStr.trim());
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(frame, "Invalid number.");
+            return;
+        }
+        
+        java.util.List<models.Question> questions = new java.util.ArrayList<>();
+        int questionId = 1; // Start from 1 for this exam
+        
+        for (int i = 0; i < numQuestions; i++) {
+            // Dialog for each question
+            JPanel panel = new JPanel(new GridLayout(2, 1, 5, 5));
+            JTextArea questionText = new JTextArea(3, 20);
+            questionText.setLineWrap(true);
+            JScrollPane scroll = new JScrollPane(questionText);
+            JTextField correctAnswer = new JTextField();
+            
+            panel.add(new JLabel("Question " + (i+1) + " Text:"));
+            panel.add(scroll);
+            panel.add(new JLabel("Correct Answer:"));
+            panel.add(correctAnswer);
+            
+            int result = JOptionPane.showConfirmDialog(frame, panel, "Add Question", JOptionPane.OK_CANCEL_OPTION);
+            if (result != JOptionPane.OK_OPTION) continue;
+            
+            String qText = questionText.getText().trim();
+            String ans = correctAnswer.getText().trim();
+            if (qText.isEmpty() || ans.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "Question and answer required.");
+                i--; // Retry
+                continue;
+            }
+            
+            models.Question q = new models.Question(questionId++, qText, ans);
+            q.setExamId(examId);
+            questions.add(q);
+        }
+        
+        if (!questions.isEmpty()) {
+            // Save questions using FileManager
+            services.FileManager.saveQuestions(questions);
+            JOptionPane.showMessageDialog(frame, "Questions added successfully!");
         }
     }
 

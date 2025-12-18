@@ -9,3 +9,6 @@ EX5,Programming
 cs2,pl3
 it1,it
 it2,it
+cs,Math
+505,Math
+606,Math

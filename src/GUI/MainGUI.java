@@ -696,30 +696,8 @@ public class MainGUI extends JFrame {
         JButton studentReportsBtn = new JButton("Student Reports");
 
         createExamBtn.addActionListener(e -> {
-            JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
-            JTextField idField = new JTextField();
-            JTextField titleField = new JTextField();
-            JTextField subjectField = new JTextField();
-            JTextField durationField = new JTextField();
-
-            panel.add(new JLabel("Exam ID:")); panel.add(idField);
-            panel.add(new JLabel("Title:")); panel.add(titleField);
-            panel.add(new JLabel("Subject:")); panel.add(subjectField);
-            panel.add(new JLabel("Duration (mins):")); panel.add(durationField);
-
-            int result = JOptionPane.showConfirmDialog(this, panel, "Create New Exam",
-                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-            if (result == JOptionPane.OK_OPTION) {
-                try {
-                    String examLine = idField.getText() + "," + titleField.getText() + "," + 
-                                      subjectField.getText() + "," + durationField.getText();
-                    appendToExamsFile(examLine);
-                    JOptionPane.showMessageDialog(this, "Exam Created Successfully!");
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, "Error creating exam: " + ex.getMessage());
-                }
-            }
+            // Open the CreateExamForm
+            new CreateExamForm();
         });
 
         modifyExamBtn.addActionListener(e -> {
