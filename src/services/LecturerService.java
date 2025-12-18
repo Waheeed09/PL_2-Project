@@ -9,6 +9,7 @@ import java.util.*;
 import models.Exam;
 import models.Lecturer;
 import models.Question;
+import models.Question;
 import models.Student;
 
 
@@ -232,12 +233,21 @@ public class LecturerService {
 
     // Grade calculator: compare answers with correct ones
     public double calculateGradeFromSubmission(String examId, String answers) {
-        List<Question> questions = FileManager.loadQuestions();
-        List<Question> examQuestions = new ArrayList<>();
-        for (Question q : questions) {
-            if (q.getExamId().equals(examId)) {
-                examQuestions.add(q);
+        ArrayList<Question> examQuestions = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader("data/questions.txt"))) {
+            String line;
+            int id = 1; // auto increment id
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty() || line.startsWith("examId")) continue;
+
+                // format: examId,text,correct
+                String[] p = line.split(",", 3);
+                if (p.length >= 3 && p[0].equals(examId)) {
+                    examQuestions.add(new Question(id++, p[1], p[2]));
+                }
             }
+        } catch (Exception e) {
+            System.out.println("Error loading questions for grading");
         }
 
         if (examQuestions.isEmpty()) return 0;

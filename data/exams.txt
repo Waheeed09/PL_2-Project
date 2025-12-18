@@ -13,3 +13,5 @@ cs,Math
 505,Math
 606,Math
 1001,Math
+1002,Math
+1003,Math

@@ -63,16 +63,65 @@ public class StudentService {
                 String approved = parts.length >= 4 ? parts[3].trim() : "";
 
                 results.append("Subject: ").append(subjectId)
-                       .append(", Grade: ").append(grade);
+                       .append(", Grade: ").append(grade).append("%");
                 if (!approved.isEmpty()) {
                     results.append(", Approved: ").append(approved);
                 }
                 results.append("\n");
+
+                // Add detailed answers for this exam
+                String examId = subjectId; // Assuming examId == subjectId for now
+                String details = getExamDetails(studentId, examId);
+                if (!details.isEmpty()) {
+                    results.append("Details:\n").append(details).append("\n");
+                }
             }
         } catch (Exception e) {
             System.out.println("Error loading student results: " + e.getMessage());
         }
         return results.toString();
+    }
+
+    // Get detailed exam results for a student
+    private String getExamDetails(int studentId, String examId) {
+        StringBuilder details = new StringBuilder();
+        try {
+            // Load questions for the exam
+            ArrayList<Question> questions = loadQuestions(examId);
+            if (questions.isEmpty()) return "";
+
+            // Load student's submission
+            String studentAnswers = "";
+            try (BufferedReader br = new BufferedReader(new FileReader(SUBMISSIONS_FILE))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] parts = line.split(",", 3);
+                    if (parts.length >= 3 && Integer.parseInt(parts[0]) == studentId && parts[1].equals(examId)) {
+                        studentAnswers = parts[2];
+                        break;
+                    }
+                }
+            }
+
+            if (studentAnswers.isEmpty()) return "";
+
+            String[] answerArray = studentAnswers.split(";");
+
+            for (int i = 0; i < questions.size(); i++) {
+                Question q = questions.get(i);
+                String studentAns = i < answerArray.length ? answerArray[i] : "No answer";
+                String correctAns = q.getCorrectAnswer();
+                boolean isCorrect = q.isCorrectAnswer(studentAns);
+
+                details.append("Q").append(i+1).append(": ").append(q.getText()).append("\n")
+                       .append("  Your answer: ").append(studentAns).append("\n")
+                       .append("  Correct answer: ").append(correctAns).append("\n")
+                       .append("  ").append(isCorrect ? "Correct" : "Incorrect").append("\n\n");
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading exam details: " + e.getMessage());
+        }
+        return details.toString();
     }
 
     // Get registered subjects for a student
