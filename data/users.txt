@@ -1,20 +1,4 @@
-1,hisham abo,his@,12345,student
-2,mohamed,moh@120,123456,admin
-5,moh,hdk@gmail,123456,admin
-6,DrAhmed,ahmed@uni.edu,pass123,lecturer
-1,A7A,a7agmai,1234,admin
-1,name,name@,12345,admin
-3,new,new@,123456,admin
-1,name,ma@,1234,admin
-12,ibrem,ib@,123,admin
-1,dr peter,a7a@,1234,lecturer
 1,dr hema,ham@,123,lecturer
-21,dr habdullah,abd@,12345,student
-101,ahmed,test@,12345,student
-202,peter,test1@,14789,student
-303,basel,test@3,456,admin
-123,kk,k@,123,student
 15,stu1,stu@,1234,student
-123,stu2,stud@,123,student
-12345,abdo,abdo@gmail,123,student
-123,abdo,abdo@,123,student
+303,basel,test@3,456,admin
+

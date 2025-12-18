@@ -1,3 +1,2 @@
 6,DrAhmed,ahmed@uni.edu,pass123
-1,dr peter,a7a@,1234
 1,dr hema,ham@,123

@@ -4,7 +4,6 @@ EX2,Physics
 EX3,English
 EX4,Algorithms
 EX5,Programming
-13,a7a
 12,is
 cs2,pl3
 it1,it
