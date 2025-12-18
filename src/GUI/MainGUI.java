@@ -3,7 +3,6 @@ package GUI;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import models.*;
@@ -246,6 +245,7 @@ public class MainGUI extends JFrame {
         JButton searchBtn = new JButton("Search User");
         JButton refreshBtn = new JButton("Refresh List");
         JButton addUserBtn = new JButton("Add New User");
+        JButton updateUserBtn = new JButton("Update User");
         JButton deleteUserBtn = new JButton("Delete Selected");
 
         searchPanel.add(new JLabel("Search (Name/ID):"));
@@ -281,6 +281,24 @@ public class MainGUI extends JFrame {
         // Add User Logic uses existing showUserForm method
         addUserBtn.addActionListener(e -> { showUserForm(null); loadUsers.run(); });
         
+        // Update User Logic
+        updateUserBtn.addActionListener(e -> {
+            int row = userTable.getSelectedRow();
+            if (row != -1) {
+                int id = (int) userTable.getValueAt(row, 0);
+                User userToUpdate = adminService.getUsers().stream()
+                    .filter(u -> u.getId() == id)
+                    .findFirst()
+                    .orElse(null);
+                if (userToUpdate != null) {
+                    showUpdateUserDialog(userToUpdate);
+                    loadUsers.run();
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Please select a user.");
+            }
+        });
+        
         // Delete Logic
         deleteUserBtn.addActionListener(e -> {
             int row = userTable.getSelectedRow();
@@ -300,6 +318,7 @@ public class MainGUI extends JFrame {
 
         JPanel userBottomPanel = new JPanel();
         userBottomPanel.add(addUserBtn);
+        userBottomPanel.add(updateUserBtn);
         userBottomPanel.add(deleteUserBtn);
 
         userPanel.add(searchPanel, BorderLayout.NORTH);
@@ -536,6 +555,7 @@ public class MainGUI extends JFrame {
         JButton viewSubjectsBtn = new JButton("View My Subjects");
         JButton feedbackBtn = new JButton("Give Feedback");
         JButton recorrectionBtn = new JButton("Request Recorrection");
+        JButton updateProfileBtn = new JButton(" Update Profile");
 
         takeExamBtn.addActionListener(e -> {
             TakeExamForm takeExamForm = new TakeExamForm(loggedInUser.getId());
@@ -575,13 +595,16 @@ public class MainGUI extends JFrame {
             new RecorrectionForm(student);
         });
 
+        updateProfileBtn.addActionListener(e -> showUpdateStudentProfileDialog());
+
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(5, 1, 10, 10)); 
+        buttonPanel.setLayout(new GridLayout(6, 1, 10, 10)); 
         buttonPanel.add(takeExamBtn);
         buttonPanel.add(viewResultsBtn);
         buttonPanel.add(viewSubjectsBtn);
         buttonPanel.add(feedbackBtn);
         buttonPanel.add(recorrectionBtn);
+        buttonPanel.add(updateProfileBtn);
 
         parent.add(Box.createVerticalStrut(20));
         parent.add(buttonPanel);
@@ -616,6 +639,52 @@ public class MainGUI extends JFrame {
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Exam ID must be a number.", "Input Error", JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+    // ==================== Update Student Profile ====================
+    private void showUpdateStudentProfileDialog() {
+        JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        JLabel idLabel = new JLabel(String.valueOf(loggedInUser.getId()));
+        idLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        JTextField nameField = new JTextField(loggedInUser.getName(), 20);
+        JTextField emailField = new JTextField(loggedInUser.getEmail(), 20);
+        JPasswordField passwordField = new JPasswordField(loggedInUser.getPassword(), 20);
+
+        panel.add(new JLabel("🆔 Student ID (Read-Only):"));
+        panel.add(idLabel);
+        panel.add(new JLabel("📝 Full Name:"));
+        panel.add(nameField);
+        panel.add(new JLabel("📧 Email Address:"));
+        panel.add(emailField);
+        panel.add(new JLabel("🔐 Password:"));
+        panel.add(passwordField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "✏️ Update Student Profile", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            if (nameField.getText().isEmpty() || emailField.getText().isEmpty() || passwordField.getPassword().length == 0) {
+                JOptionPane.showMessageDialog(this, "❌ Please fill in all fields!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Update user data
+            loggedInUser.setName(nameField.getText().trim());
+            loggedInUser.setEmail(emailField.getText().trim());
+            loggedInUser.setPassword(new String(passwordField.getPassword()));
+
+            // Update in users list
+            for (int i = 0; i < adminService.getUsers().size(); i++) {
+                if (adminService.getUsers().get(i).getId() == loggedInUser.getId()) {
+                    adminService.getUsers().set(i, loggedInUser);
+                    break;
+                }
+            }
+
+            // Save data to file
+            FileManager.saveUsers(adminService.getUsers());
+            JOptionPane.showMessageDialog(this, "✅ Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -768,6 +837,47 @@ public class MainGUI extends JFrame {
         }
         JTable table = new JTable(data, columns);
         JOptionPane.showMessageDialog(this, new JScrollPane(table), "Student Reports", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    // ==================== Update User Dialog ====================
+    private void showUpdateUserDialog(User user) {
+        JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        JLabel idLabel = new JLabel(String.valueOf(user.getId()));
+        idLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        
+        JTextField nameField = new JTextField(user.getName(), 20);
+        JTextField emailField = new JTextField(user.getEmail(), 20);
+        JPasswordField passwordField = new JPasswordField(user.getPassword(), 20);
+
+        panel.add(new JLabel("🆔 User ID:"));
+        panel.add(idLabel);
+        panel.add(new JLabel("📝 Name:"));
+        panel.add(nameField);
+        panel.add(new JLabel("📧 Email:"));
+        panel.add(emailField);
+        panel.add(new JLabel("🔐 Password:"));
+        panel.add(passwordField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "✏️ Update User", JOptionPane.OK_CANCEL_OPTION);
+        
+        if (result == JOptionPane.OK_OPTION) {
+            if (nameField.getText().trim().isEmpty() || emailField.getText().trim().isEmpty() || 
+                passwordField.getPassword().length == 0) {
+                JOptionPane.showMessageDialog(this, "❌ All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Update user
+            user.setName(nameField.getText().trim());
+            user.setEmail(emailField.getText().trim());
+            user.setPassword(new String(passwordField.getPassword()));
+
+            // Save to file
+            FileManager.saveUsers(adminService.getUsers());
+            JOptionPane.showMessageDialog(this, "✅ User updated successfully!");
+        }
     }
 
     public static void main(String[] args) {

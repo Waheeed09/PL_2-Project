@@ -1,11 +1,14 @@
 package GUI;
 
-import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
-import models.User;
-import models.Student;
+import javax.swing.*;
 import models.Lecturer;
+import models.Student;
+import models.Subject;
+import models.User;
+import services.FileManager;
 import services.StudentService;
 import services.UserService;
 
@@ -43,16 +46,20 @@ public class AdminDashboard extends JFrame {
         JScrollPane scrollPane = new JScrollPane(userList);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 4, 5, 5));
+        JPanel buttonPanel = new JPanel(new GridLayout(2, 3, 5, 5));
 
         JButton btnAddUser = new JButton("Add User");
         JButton btnModifyUser = new JButton("Modify User");
         JButton btnDeleteUser = new JButton("Delete User");
         JButton btnRefresh = new JButton("Refresh List");
+        JButton btnAssignSubject = new JButton("Assign Subject");
+        JButton btnUpdateStudent = new JButton("Update Student");
 
         buttonPanel.add(btnAddUser);
         buttonPanel.add(btnModifyUser);
         buttonPanel.add(btnDeleteUser);
+        buttonPanel.add(btnAssignSubject);
+        buttonPanel.add(btnUpdateStudent);
         buttonPanel.add(btnRefresh);
 
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -63,6 +70,8 @@ public class AdminDashboard extends JFrame {
         btnAddUser.addActionListener(e -> addUser());
         btnModifyUser.addActionListener(e -> modifyUser());
         btnDeleteUser.addActionListener(e -> deleteUser());
+        btnAssignSubject.addActionListener(e -> assignSubject());
+        btnUpdateStudent.addActionListener(e -> updateStudent());
         btnRefresh.addActionListener(e -> refreshUserList());
     }
 
@@ -158,6 +167,132 @@ public class AdminDashboard extends JFrame {
             users.remove(index);
             refreshUserList();
             JOptionPane.showMessageDialog(this, "User deleted successfully!");
+        }
+    }
+
+    // ==================== Assign Subject to Student ====================
+    private void assignSubject() {
+        int index = userList.getSelectedIndex();
+        if (index == -1) {
+            JOptionPane.showMessageDialog(this, "Select a student to assign subject.");
+            return;
+        }
+        User user = users.get(index);
+        
+        // Check if user is a student
+        if (!user.getRole().equals("student")) {
+            JOptionPane.showMessageDialog(this, "Please select a student!");
+            return;
+        }
+
+        Student student = (Student) user;
+        
+        // Get all available subjects
+        ArrayList<Subject> subjects = studentService.loadAllSubjects();
+        if (subjects.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No subjects available!");
+            return;
+        }
+
+        // Create subject selection dialog
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        JLabel labelInfo = new JLabel("📚 Select subjects for: " + student.getName());
+        labelInfo.setFont(new Font("Arial", Font.BOLD, 12));
+        panel.add(labelInfo, BorderLayout.NORTH);
+
+        // Subject checkboxes
+        JPanel subjectPanel = new JPanel(new BorderLayout());
+        subjectPanel.setBorder(BorderFactory.createTitledBorder("Available Subjects"));
+        
+        JPanel checkboxPanel = new JPanel();
+        checkboxPanel.setLayout(new BoxLayout(checkboxPanel, BoxLayout.Y_AXIS));
+        
+        javax.swing.JCheckBox[] subjectCheckboxes = new javax.swing.JCheckBox[subjects.size()];
+        for (int i = 0; i < subjects.size(); i++) {
+            Subject subject = subjects.get(i);
+            subjectCheckboxes[i] = new javax.swing.JCheckBox(subject.getSubjectId() + " - " + subject.getSubjectName());
+            checkboxPanel.add(subjectCheckboxes[i]);
+        }
+        
+        JScrollPane scrollPane = new JScrollPane(checkboxPanel);
+        subjectPanel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(subjectPanel, BorderLayout.CENTER);
+
+        // Show dialog
+        int result = JOptionPane.showConfirmDialog(this, panel, "✏️ Assign Subjects", JOptionPane.OK_CANCEL_OPTION);
+        
+        if (result == JOptionPane.OK_OPTION) {
+            int assigned = 0;
+            for (int i = 0; i < subjectCheckboxes.length; i++) {
+                if (subjectCheckboxes[i].isSelected()) {
+                    Subject subject = subjects.get(i);
+                    if (studentService.registerSubject(student.getId(), subject.getSubjectId(), subject.getSubjectName())) {
+                        assigned++;
+                    }
+                }
+            }
+            if (assigned > 0) {
+                JOptionPane.showMessageDialog(this, "✅ " + assigned + " subject(s) assigned successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this, "❌ No subjects were assigned.");
+            }
+        }
+    }
+
+    // ==================== Update Student ====================
+    private void updateStudent() {
+        int index = userList.getSelectedIndex();
+        if (index == -1) {
+            JOptionPane.showMessageDialog(this, "Select a student to update.");
+            return;
+        }
+        User user = users.get(index);
+        
+        // Check if user is a student
+        if (!user.getRole().equals("student")) {
+            JOptionPane.showMessageDialog(this, "Please select a student!");
+            return;
+        }
+
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        JLabel idLabel = new JLabel(String.valueOf(user.getId()));
+        idLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        
+        JTextField nameField = new JTextField(user.getName(), 20);
+        JTextField emailField = new JTextField(user.getEmail(), 20);
+        JPasswordField passwordField = new JPasswordField(user.getPassword(), 20);
+
+        panel.add(new JLabel("🆔 Student ID:"));
+        panel.add(idLabel);
+        panel.add(new JLabel("📝 Name:"));
+        panel.add(nameField);
+        panel.add(new JLabel("📧 Email:"));
+        panel.add(emailField);
+        panel.add(new JLabel("🔐 Password:"));
+        panel.add(passwordField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "✏️ Update Student", JOptionPane.OK_CANCEL_OPTION);
+        
+        if (result == JOptionPane.OK_OPTION) {
+            if (nameField.getText().trim().isEmpty() || emailField.getText().trim().isEmpty() || 
+                passwordField.getPassword().length == 0) {
+                JOptionPane.showMessageDialog(this, "❌ All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Update user
+            user.setName(nameField.getText().trim());
+            user.setEmail(emailField.getText().trim());
+            user.setPassword(new String(passwordField.getPassword()));
+
+            // Save to file
+            FileManager.saveUsers(users);
+            refreshUserList();
+            JOptionPane.showMessageDialog(this, "✅ Student updated successfully!");
         }
     }
 }
