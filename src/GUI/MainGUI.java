@@ -15,13 +15,31 @@ public class MainGUI extends JFrame {
     private UserService userService;
     private User loggedInUser;
     private JPanel currentPanel;
+    private Image backgroundImage;
 
     public MainGUI() {
         super("University Examination System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(900, 700); // Increased size slightly for better admin view
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
+        // Load background image (absolute path provided by user)
+        String bgPath = "D:\\Uni_Bedo\\Pl2\\Project_pl2\\PL_2-Project\\resources\\WhatsApp Image 2026-01-11 at 4.44.40 PM.jpeg";
+        backgroundImage = UITheme.loadBackgroundImageAbsolute(bgPath);
+
+        // Use a content pane that paints the background image stretched to fill
+        JPanel backgroundPane = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (backgroundImage != null) {
+                    int w = getWidth();
+                    int h = getHeight();
+                    g.drawImage(backgroundImage, 0, 0, w, h, this);
+                }
+            }
+        };
+        backgroundPane.setLayout(new BorderLayout());
+        setContentPane(backgroundPane);
 
         // Initialize services
         initializeServices();
@@ -54,29 +72,36 @@ public class MainGUI extends JFrame {
         }
         
         JPanel panel = new JPanel(new GridBagLayout());
+        panel.setOpaque(false); // let background show through
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel titleLabel = new JLabel("Login", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        JLabel titleLabel = new JLabel("University Examination System", JLabel.CENTER);
+        titleLabel.setFont(UITheme.FONT_TITLE);
+        titleLabel.setForeground(UITheme.TEXT_COLOR);
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         panel.add(titleLabel, gbc);
 
         gbc.gridy++; gbc.gridwidth = 1;
-        panel.add(new JLabel("Email:"), gbc);
+        JLabel emailLbl = new JLabel("Email:"); emailLbl.setFont(UITheme.FONT_LABEL); emailLbl.setForeground(UITheme.TEXT_COLOR);
+        panel.add(emailLbl, gbc);
         JTextField emailField = new JTextField(20);
+        emailField.setFont(UITheme.FONT_BODY);
         gbc.gridx = 1;
         panel.add(emailField, gbc);
 
         gbc.gridy++; gbc.gridx = 0;
-        panel.add(new JLabel("Password:"), gbc);
+        JLabel passLbl = new JLabel("Password:"); passLbl.setFont(UITheme.FONT_LABEL); passLbl.setForeground(UITheme.TEXT_COLOR);
+        panel.add(passLbl, gbc);
         JPasswordField passwordField = new JPasswordField(20);
+        passwordField.setFont(UITheme.FONT_BODY);
         gbc.gridx = 1;
         panel.add(passwordField, gbc);
 
         gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 2;
-        JButton loginButton = new JButton("Login");
+        JButton loginButton = new RoundedButton("Login", UITheme.createLetterIcon("IN", UITheme.PRIMARY_COLOR, Color.WHITE, 20));
+        loginButton.setBackground(UITheme.PRIMARY_COLOR);
         loginButton.addActionListener(e -> {
             String email = emailField.getText();
             String password = new String(passwordField.getPassword());
@@ -92,12 +117,13 @@ public class MainGUI extends JFrame {
         panel.add(loginButton, gbc);
 
         gbc.gridy++;
-        JButton registerButton = new JButton("Create New Account");
+        JButton registerButton = new RoundedButton("Create New Account", UITheme.createLetterIcon("+", UITheme.PRIMARY_COLOR.darker(), Color.WHITE, 18));
+        registerButton.setBackground(UITheme.PRIMARY_COLOR.darker());
         registerButton.addActionListener(e -> showRegistrationPanel());
         panel.add(registerButton, gbc);
 
         currentPanel = panel;
-        add(currentPanel, BorderLayout.CENTER);
+        getContentPane().add(currentPanel, BorderLayout.CENTER);
         revalidate(); repaint();
     }
 
@@ -105,43 +131,51 @@ public class MainGUI extends JFrame {
         if (currentPanel != null) remove(currentPanel);
         
         JPanel panel = new JPanel(new GridBagLayout());
+        panel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         JLabel titleLabel = new JLabel("Create New Account", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setFont(UITheme.FONT_TITLE);
+        titleLabel.setForeground(UITheme.TEXT_COLOR);
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         panel.add(titleLabel, gbc);
 
         gbc.gridy++; gbc.gridwidth = 1;
-        panel.add(new JLabel("ID:"), gbc);
-        JTextField idField = new JTextField(20);
+        JLabel idLbl = new JLabel("ID:"); idLbl.setFont(UITheme.FONT_LABEL); idLbl.setForeground(UITheme.TEXT_COLOR);
+        panel.add(idLbl, gbc);
+        JTextField idField = new JTextField(20); idField.setFont(UITheme.FONT_BODY);
         gbc.gridx = 1; panel.add(idField, gbc);
 
         gbc.gridy++; gbc.gridx = 0;
-        panel.add(new JLabel("Name:"), gbc);
-        JTextField nameField = new JTextField(20);
+        JLabel nameLbl = new JLabel("Name:"); nameLbl.setFont(UITheme.FONT_LABEL); nameLbl.setForeground(UITheme.TEXT_COLOR);
+        panel.add(nameLbl, gbc);
+        JTextField nameField = new JTextField(20); nameField.setFont(UITheme.FONT_BODY);
         gbc.gridx = 1; panel.add(nameField, gbc);
 
         gbc.gridy++; gbc.gridx = 0;
-        panel.add(new JLabel("Email:"), gbc);
-        JTextField emailField = new JTextField(20);
+        JLabel emailLbl = new JLabel("Email:"); emailLbl.setFont(UITheme.FONT_LABEL); emailLbl.setForeground(UITheme.TEXT_COLOR);
+        panel.add(emailLbl, gbc);
+        JTextField emailField = new JTextField(20); emailField.setFont(UITheme.FONT_BODY);
         gbc.gridx = 1; panel.add(emailField, gbc);
 
         gbc.gridy++; gbc.gridx = 0;
-        panel.add(new JLabel("Password:"), gbc);
-        JPasswordField passwordField = new JPasswordField(20);
+        JLabel passLbl = new JLabel("Password:"); passLbl.setFont(UITheme.FONT_LABEL); passLbl.setForeground(UITheme.TEXT_COLOR);
+        panel.add(passLbl, gbc);
+        JPasswordField passwordField = new JPasswordField(20); passwordField.setFont(UITheme.FONT_BODY);
         gbc.gridx = 1; panel.add(passwordField, gbc);
 
         gbc.gridy++; gbc.gridx = 0;
-        panel.add(new JLabel("Role:"), gbc);
+        JLabel roleLbl = new JLabel("Role:"); roleLbl.setFont(UITheme.FONT_LABEL); roleLbl.setForeground(UITheme.TEXT_COLOR);
+        panel.add(roleLbl, gbc);
         String[] roles = {"Student", "Lecturer", "Admin"};
-        JComboBox<String> roleCombo = new JComboBox<>(roles);
+        JComboBox<String> roleCombo = new JComboBox<>(roles); roleCombo.setFont(UITheme.FONT_BODY);
         gbc.gridx = 1; panel.add(roleCombo, gbc);
 
         gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 2;
-        JButton registerButton = new JButton("Register");
+        JButton registerButton = new RoundedButton("Register", UITheme.createLetterIcon("in", UITheme.PRIMARY_COLOR, Color.WHITE, 20));
+        registerButton.setBackground(UITheme.PRIMARY_COLOR);
         registerButton.addActionListener(e -> {
             try {
                 int id = Integer.parseInt(idField.getText());
@@ -165,13 +199,28 @@ public class MainGUI extends JFrame {
         });
         panel.add(registerButton, gbc);
 
-        gbc.gridy++;
-        JButton backButton = new JButton("Back to Login");
-        backButton.addActionListener(e -> showLoginPanel());
-        panel.add(backButton, gbc);
+    gbc.gridy++;
+gbc.gridx = 0;
+gbc.gridwidth = 2;
+
+gbc.gridy++;
+gbc.gridx = 0;
+gbc.gridwidth = 2;
+
+JButton backButton = new RoundedButton("Back to Login", null); // مفيش أيقونة
+backButton.setBackground(Color.RED); // خلفية حمراء
+backButton.setForeground(Color.WHITE); // نص أبيض واضح
+backButton.setFont(new Font("Arial", Font.BOLD, 18)); // نص واضح زي باقي الأزرار
+backButton.setFocusPainted(false); // يلغي الإطار عند الضغط
+
+backButton.addActionListener(e -> showLoginPanel());
+
+panel.add(backButton, gbc);
+
+
 
         currentPanel = panel;
-        add(currentPanel, BorderLayout.CENTER);
+        getContentPane().add(currentPanel, BorderLayout.CENTER);
         revalidate(); repaint();
     }
 
@@ -180,16 +229,22 @@ public class MainGUI extends JFrame {
         if (currentPanel != null) remove(currentPanel);
 
         JPanel panel = new JPanel(new BorderLayout());
+        panel.setOpaque(false);
         
         // Header with Logout
         JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(255, 255, 255, 200)); // Semi-transparent white
+        headerPanel.setOpaque(true);
         headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JLabel welcomeLabel = new JLabel("Welcome, " + loggedInUser.getName() + " (" + loggedInUser.getRole() + ")", JLabel.CENTER);
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        welcomeLabel.setFont(UITheme.FONT_TITLE);
+        welcomeLabel.setForeground(UITheme.TEXT_COLOR);
         
-        JButton logoutBtn = new JButton("Logout");
+        JButton logoutBtn = new RoundedButton(" LOGOUT", UITheme.createLetterIcon("OUT", Color.RED, Color.WHITE, 18));
         logoutBtn.setBackground(Color.RED);
         logoutBtn.setForeground(Color.WHITE);
+        logoutBtn.setFont(new Font("Arial", Font.BOLD, 12));
+        logoutBtn.setPreferredSize(new Dimension(130, 40));
         logoutBtn.addActionListener(e -> {
             loggedInUser = null;
             showLoginPanel();
@@ -199,8 +254,19 @@ public class MainGUI extends JFrame {
         headerPanel.add(logoutBtn, BorderLayout.EAST);
         panel.add(headerPanel, BorderLayout.NORTH);
 
-        JPanel contentPanel = new JPanel();
+        JPanel contentPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (backgroundImage != null) {
+                    int w = getWidth();
+                    int h = getHeight();
+                    g.drawImage(backgroundImage, 0, 0, w, h, this);
+                }
+            }
+        };
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setOpaque(true);
 
         switch (loggedInUser.getRole()) {
             case "admin":
@@ -220,7 +286,7 @@ public class MainGUI extends JFrame {
         }
 
         currentPanel = panel;
-        add(currentPanel, BorderLayout.CENTER);
+        getContentPane().add(currentPanel, BorderLayout.CENTER);
         revalidate(); repaint();
     }
 
@@ -235,20 +301,33 @@ public class MainGUI extends JFrame {
     // d) Grade Approval (Review and Publish)
     private void showAdminPanel(JPanel parentPanel) {
         JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setFont(UITheme.FONT_LABEL);
+        tabbedPane.setBackground(new Color(255, 255, 255, 230));
 
         // --- Tab 1: User Management (Requirement b) ---
         JPanel userPanel = new JPanel(new BorderLayout());
+        userPanel.setOpaque(false);
         
         // Search Bar
         JPanel searchPanel = new JPanel();
+        searchPanel.setBackground(new Color(255, 255, 255, 220));
+        searchPanel.setOpaque(true);
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JTextField searchField = new JTextField(20);
-        JButton searchBtn = new JButton("Search User");
-        JButton refreshBtn = new JButton("Refresh List");
-        JButton addUserBtn = new JButton("Add New User");
-        JButton updateUserBtn = new JButton("Update User");
-        JButton deleteUserBtn = new JButton("Delete Selected");
+        searchField.setFont(UITheme.FONT_BODY);
+        UITheme.styleTextField(searchField);
+        JButton searchBtn = new RoundedButton("Search");
+        searchBtn.setBackground(UITheme.PRIMARY_COLOR);
+        JButton refreshBtn = new RoundedButton("Refresh");
+        refreshBtn.setBackground(UITheme.PRIMARY_COLOR);
+        JButton addUserBtn = new RoundedButton("+ Add User");
+        addUserBtn.setBackground(new Color(0, 153, 76));
+        JButton updateUserBtn = new RoundedButton("✎ Update");
+        updateUserBtn.setBackground(new Color(255, 165, 0));
+        JButton deleteUserBtn = new RoundedButton("✕ Delete");
+        deleteUserBtn.setBackground(Color.RED.darker());
 
-        searchPanel.add(new JLabel("Search (Name/ID):"));
+        searchPanel.add(new JLabel("Search (Name/ID):", JLabel.CENTER));
         searchPanel.add(searchField);
         searchPanel.add(searchBtn);
         searchPanel.add(refreshBtn);
@@ -256,6 +335,10 @@ public class MainGUI extends JFrame {
         String[] columns = {"ID", "Name", "Email", "Role"};
         DefaultTableModel userModel = new DefaultTableModel(columns, 0);
         JTable userTable = new JTable(userModel);
+        UITheme.styleTable(userTable);
+        JScrollPane userScrollPane = new JScrollPane(userTable);
+        userScrollPane.setOpaque(false);
+        userScrollPane.getViewport().setOpaque(false);
         
         Runnable loadUsers = () -> {
             userModel.setRowCount(0);
@@ -317,22 +400,33 @@ public class MainGUI extends JFrame {
         });
 
         JPanel userBottomPanel = new JPanel();
+        userBottomPanel.setBackground(new Color(255, 255, 255, 220));
+        userBottomPanel.setOpaque(true);
+        userBottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         userBottomPanel.add(addUserBtn);
         userBottomPanel.add(updateUserBtn);
         userBottomPanel.add(deleteUserBtn);
 
         userPanel.add(searchPanel, BorderLayout.NORTH);
-        userPanel.add(new JScrollPane(userTable), BorderLayout.CENTER);
+        userPanel.add(userScrollPane, BorderLayout.CENTER);
         userPanel.add(userBottomPanel, BorderLayout.SOUTH);
 
         // --- Tab 2: Subject Management (Requirement c) ---
         JPanel subjectPanel = new JPanel(new BorderLayout());
-        JPanel subControlPanel = new JPanel(new GridLayout(2, 1));
+        subjectPanel.setOpaque(false);
+        JPanel subControlPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+        subControlPanel.setBackground(new Color(255, 255, 255, 220));
+        subControlPanel.setOpaque(true);
+        subControlPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JPanel subBtns1 = new JPanel();
+        subBtns1.setOpaque(false);
         JPanel subBtns2 = new JPanel();
+        subBtns2.setOpaque(false);
 
-        JButton addSubjectBtn = new JButton("Add New Subject");
-        JButton assignSubjectBtn = new JButton("Assign Subject to User");
+        JButton addSubjectBtn = new RoundedButton("+ Add Subject");
+        addSubjectBtn.setBackground(new Color(0, 153, 76));
+        JButton assignSubjectBtn = new RoundedButton("⚡ Assign Subject");
+        assignSubjectBtn.setBackground(UITheme.PRIMARY_COLOR);
         
         subBtns1.add(addSubjectBtn);
         subBtns2.add(assignSubjectBtn);
@@ -341,7 +435,11 @@ public class MainGUI extends JFrame {
 
         JTextArea subjectListArea = new JTextArea();
         subjectListArea.setEditable(false);
-        subjectListArea.setBorder(BorderFactory.createTitledBorder("Current Subjects & Assignments"));
+        subjectListArea.setFont(UITheme.FONT_BODY);
+        subjectListArea.setBackground(new Color(255, 255, 255, 240));
+        subjectListArea.setForeground(UITheme.TEXT_COLOR);
+        subjectListArea.setBorder(BorderFactory.createTitledBorder("📚 Current Subjects & Assignments"));
+        subjectListArea.setMargin(new Insets(10, 10, 10, 10));
 
         Runnable loadSubjects = () -> {
             subjectListArea.setText("");
@@ -349,7 +447,7 @@ public class MainGUI extends JFrame {
             if(sFile.exists()) {
                 try (BufferedReader br = new BufferedReader(new FileReader(sFile))) {
                     String line;
-                    subjectListArea.append("--- Subjects ---\n");
+                    subjectListArea.append("=== Subjects ===\n");
                     while ((line = br.readLine()) != null) subjectListArea.append(line + "\n");
                 } catch (Exception ex) {}
             }
@@ -357,7 +455,7 @@ public class MainGUI extends JFrame {
             if(aFile.exists()) {
                 try (BufferedReader br = new BufferedReader(new FileReader(aFile))) {
                     String line;
-                    subjectListArea.append("\n--- Assignments (SubjectID, UserID) ---\n");
+                    subjectListArea.append("\n=== Assignments (SubjectID, UserID) ===\n");
                     while ((line = br.readLine()) != null) subjectListArea.append(line + "\n");
                 } catch (Exception ex) {}
             }
@@ -397,12 +495,18 @@ public class MainGUI extends JFrame {
 
         // --- Tab 3: Grade Approval (Requirement d) ---
         JPanel gradePanel = new JPanel(new BorderLayout());
+        gradePanel.setOpaque(false);
         DefaultTableModel gradeModel = new DefaultTableModel(new String[]{"Raw Data Line", "Status"}, 0);
         JTable gradeTable = new JTable(gradeModel);
-        JButton loadGradesBtn = new JButton("Load Pending Grades");
-        JButton approveBtn = new JButton("Approve & Publish All");
+        UITheme.styleTable(gradeTable);
+        JScrollPane gradeScrollPane = new JScrollPane(gradeTable);
+        gradeScrollPane.setOpaque(false);
+        gradeScrollPane.getViewport().setOpaque(false);
+        
+        JButton loadGradesBtn = new RoundedButton(" Load Pending Grades");
+        loadGradesBtn.setBackground(UITheme.PRIMARY_COLOR);
+        JButton approveBtn = new RoundedButton("✓ Approve & Publish");
         approveBtn.setBackground(new Color(0, 153, 76)); // Green color
-        approveBtn.setForeground(Color.WHITE);
 
         loadGradesBtn.addActionListener(e -> {
             gradeModel.setRowCount(0);
@@ -411,7 +515,7 @@ public class MainGUI extends JFrame {
                 try (BufferedReader br = new BufferedReader(new FileReader(f))) {
                     String line;
                     while ((line = br.readLine()) != null) {
-                        String status = line.contains("APPROVED") ? "Published" : "PENDING REVIEW";
+                        String status = line.contains("APPROVED") ? "✓ Published" : " PENDING";
                         gradeModel.addRow(new Object[]{line, status});
                     }
                 } catch(Exception ex){}
@@ -434,7 +538,7 @@ public class MainGUI extends JFrame {
             
             try (PrintWriter pw = new PrintWriter(new FileWriter(f))) {
                 for (String l : lines) pw.println(l);
-                JOptionPane.showMessageDialog(this, "All Grades have been Approved & Published to Students!");
+                JOptionPane.showMessageDialog(this, "✓ All Grades Approved & Published!");
                 loadGradesBtn.doClick(); // Refresh table
             } catch(Exception ex){
                 JOptionPane.showMessageDialog(this, "Error saving file.");
@@ -442,33 +546,62 @@ public class MainGUI extends JFrame {
         });
 
         JPanel gradeBtnPanel = new JPanel();
+        gradeBtnPanel.setBackground(new Color(255, 255, 255, 220));
+        gradeBtnPanel.setOpaque(true);
+        gradeBtnPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         gradeBtnPanel.add(loadGradesBtn);
         gradeBtnPanel.add(approveBtn);
 
-        gradePanel.add(new JScrollPane(gradeTable), BorderLayout.CENTER);
+        gradePanel.add(gradeScrollPane, BorderLayout.CENTER);
         gradePanel.add(gradeBtnPanel, BorderLayout.SOUTH);
 
         // --- Tab 4: My Profile (Requirement a - Alter credentials) ---
         JPanel profilePanel = new JPanel(new GridBagLayout());
+        profilePanel.setOpaque(false);
+        profilePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         GridBagConstraints pGbc = new GridBagConstraints();
-        pGbc.insets = new Insets(10, 10, 10, 10);
+        pGbc.insets = new Insets(15, 15, 15, 15);
         pGbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JTextField nameF = new JTextField(loggedInUser.getName(), 20);
-        JTextField emailF = new JTextField(loggedInUser.getEmail(), 20);
-        JPasswordField passF = new JPasswordField(loggedInUser.getPassword(), 20);
-        JButton updateProfileBtn = new JButton("Update My Credentials");
+        JLabel titleLabel = new JLabel(" Update My Profile", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setForeground(UITheme.TEXT_COLOR);
+        pGbc.gridx=0; pGbc.gridy=0; pGbc.gridwidth=2;
+        profilePanel.add(titleLabel, pGbc);
 
-        pGbc.gridx=0; pGbc.gridy=0; profilePanel.add(new JLabel("My Name:"), pGbc);
+        pGbc.gridy++;
+        pGbc.gridwidth=1;
+        JLabel nameLabel = new JLabel("Name:");
+        nameLabel.setFont(UITheme.FONT_LABEL);
+        nameLabel.setForeground(UITheme.TEXT_COLOR);
+        pGbc.gridx=0; profilePanel.add(nameLabel, pGbc);
+        JTextField nameF = new JTextField(loggedInUser.getName(), 20);
+        nameF.setFont(UITheme.FONT_BODY);
+        UITheme.styleTextField(nameF);
         pGbc.gridx=1; profilePanel.add(nameF, pGbc);
         
-        pGbc.gridx=0; pGbc.gridy=1; profilePanel.add(new JLabel("My Email:"), pGbc);
+        pGbc.gridy++;
+        JLabel emailLabel = new JLabel("Email:");
+        emailLabel.setFont(UITheme.FONT_LABEL);
+        emailLabel.setForeground(UITheme.TEXT_COLOR);
+        pGbc.gridx=0; profilePanel.add(emailLabel, pGbc);
+        JTextField emailF = new JTextField(loggedInUser.getEmail(), 20);
+        emailF.setFont(UITheme.FONT_BODY);
+        UITheme.styleTextField(emailF);
         pGbc.gridx=1; profilePanel.add(emailF, pGbc);
         
-        pGbc.gridx=0; pGbc.gridy=2; profilePanel.add(new JLabel("My Password:"), pGbc);
+        pGbc.gridy++;
+        JLabel passLabel = new JLabel("Password:");
+        passLabel.setFont(UITheme.FONT_LABEL);
+        passLabel.setForeground(UITheme.TEXT_COLOR);
+        pGbc.gridx=0; profilePanel.add(passLabel, pGbc);
+        JPasswordField passF = new JPasswordField(loggedInUser.getPassword(), 20);
+        passF.setFont(UITheme.FONT_BODY);
         pGbc.gridx=1; profilePanel.add(passF, pGbc);
         
-        pGbc.gridx=0; pGbc.gridy=3; pGbc.gridwidth=2; 
+        pGbc.gridy++; pGbc.gridwidth=2; pGbc.gridx=0;
+        JButton updateProfileBtn = new RoundedButton("✓ Save Changes");
+        updateProfileBtn.setBackground(UITheme.PRIMARY_COLOR);
         profilePanel.add(updateProfileBtn, pGbc);
 
         updateProfileBtn.addActionListener(e -> {
@@ -484,7 +617,7 @@ public class MainGUI extends JFrame {
                 }
             }
             FileManager.saveUsers(adminService.getUsers());
-            JOptionPane.showMessageDialog(this, "Credentials Updated Successfully!");
+            JOptionPane.showMessageDialog(this, "✓ Profile Updated!");
             JLabel welcomeLabel = (JLabel)((JPanel)parentPanel.getComponent(0)).getComponent(0);
             welcomeLabel.setText("Welcome, " + loggedInUser.getName() + " (" + loggedInUser.getRole() + ")");
         });
@@ -550,12 +683,18 @@ public class MainGUI extends JFrame {
     }
 
     private void showStudentPanel(JPanel parent) {
-        JButton takeExamBtn = new JButton("Take Exam");
-        JButton viewResultsBtn = new JButton("View My Results");
-        JButton viewSubjectsBtn = new JButton("View My Subjects");
-        JButton feedbackBtn = new JButton("Give Feedback");
-        JButton recorrectionBtn = new JButton("Request Recorrection");
-        JButton updateProfileBtn = new JButton(" Update Profile");
+        JButton takeExamBtn = new RoundedButton(" Take Exam");
+        takeExamBtn.setBackground(UITheme.PRIMARY_COLOR);
+        JButton viewResultsBtn = new RoundedButton(" View Results");
+        viewResultsBtn.setBackground(new Color(0, 153, 76));
+        JButton viewSubjectsBtn = new RoundedButton(" My Subjects");
+        viewSubjectsBtn.setBackground(new Color(255, 165, 0));
+        JButton feedbackBtn = new RoundedButton(" Feedback");
+        feedbackBtn.setBackground(new Color(155, 89, 182));
+        JButton recorrectionBtn = new RoundedButton(" Request Recorrection");
+        recorrectionBtn.setBackground(Color.RED.darker());
+        JButton updateProfileBtn = new RoundedButton(" Update Profile");
+        updateProfileBtn.setBackground(new Color(52, 152, 219));
 
         takeExamBtn.addActionListener(e -> {
             TakeExamForm takeExamForm = new TakeExamForm(loggedInUser.getId());
@@ -569,9 +708,10 @@ public class MainGUI extends JFrame {
             } else {
                 JTextArea textArea = new JTextArea(results);
                 textArea.setEditable(false);
+                textArea.setFont(UITheme.FONT_BODY);
                 JScrollPane scrollPane = new JScrollPane(textArea);
                 scrollPane.setPreferredSize(new Dimension(400, 300));
-                JOptionPane.showMessageDialog(this, scrollPane, "My Results", JOptionPane.PLAIN_MESSAGE);
+                JOptionPane.showMessageDialog(this, scrollPane, "📊 My Results", JOptionPane.PLAIN_MESSAGE);
             }
         });
 
@@ -582,9 +722,10 @@ public class MainGUI extends JFrame {
             } else {
                 JTextArea textArea = new JTextArea(subjects);
                 textArea.setEditable(false);
+                textArea.setFont(UITheme.FONT_BODY);
                 JScrollPane scrollPane = new JScrollPane(textArea);
                 scrollPane.setPreferredSize(new Dimension(300, 200));
-                JOptionPane.showMessageDialog(this, scrollPane, "My Subjects", JOptionPane.PLAIN_MESSAGE);
+                JOptionPane.showMessageDialog(this, scrollPane, " My Subjects", JOptionPane.PLAIN_MESSAGE);
             }
         });
 
@@ -598,7 +739,9 @@ public class MainGUI extends JFrame {
         updateProfileBtn.addActionListener(e -> showUpdateStudentProfileDialog());
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(6, 1, 10, 10)); 
+        buttonPanel.setLayout(new GridLayout(6, 1, 10, 10));
+        buttonPanel.setOpaque(false);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
         buttonPanel.add(takeExamBtn);
         buttonPanel.add(viewResultsBtn);
         buttonPanel.add(viewSubjectsBtn);
@@ -653,16 +796,16 @@ public class MainGUI extends JFrame {
         JTextField emailField = new JTextField(loggedInUser.getEmail(), 20);
         JPasswordField passwordField = new JPasswordField(loggedInUser.getPassword(), 20);
 
-        panel.add(new JLabel("🆔 Student ID (Read-Only):"));
+        panel.add(new JLabel(" Student ID (Read-Only):"));
         panel.add(idLabel);
-        panel.add(new JLabel("📝 Full Name:"));
+        panel.add(new JLabel(" Full Name:"));
         panel.add(nameField);
-        panel.add(new JLabel("📧 Email Address:"));
+        panel.add(new JLabel(" Email Address:"));
         panel.add(emailField);
-        panel.add(new JLabel("🔐 Password:"));
+        panel.add(new JLabel(" Password:"));
         panel.add(passwordField);
 
-        int result = JOptionPane.showConfirmDialog(this, panel, "✏️ Update Student Profile", JOptionPane.OK_CANCEL_OPTION);
+        int result = JOptionPane.showConfirmDialog(this, panel, " Update Student Profile", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             if (nameField.getText().isEmpty() || emailField.getText().isEmpty() || passwordField.getPassword().length == 0) {
                 JOptionPane.showMessageDialog(this, "❌ Please fill in all fields!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -689,11 +832,16 @@ public class MainGUI extends JFrame {
     }
 
      private void showLecturerPanel(JPanel parent) {
-        JButton createExamBtn = new JButton("Create Exam");
-        JButton modifyExamBtn = new JButton("Modify Exam");
-        JButton deleteExamBtn = new JButton("Delete Exam");
-        JButton viewExamsBtn = new JButton("View Exams");
-        JButton studentReportsBtn = new JButton("Student Reports");
+        JButton createExamBtn = new RoundedButton("Create Exam");
+        createExamBtn.setBackground(UITheme.PRIMARY_COLOR);
+        JButton modifyExamBtn = new RoundedButton("Modify Exam");
+        modifyExamBtn.setBackground(new Color(255, 165, 0));
+        JButton deleteExamBtn = new RoundedButton("Delete Exam");
+        deleteExamBtn.setBackground(Color.RED.darker());
+        JButton viewExamsBtn = new RoundedButton("👁️ View All Exams");
+        viewExamsBtn.setBackground(new Color(0, 153, 76));
+        JButton studentReportsBtn = new RoundedButton("📈 Student Reports");
+        studentReportsBtn.setBackground(new Color(155, 89, 182));
 
         createExamBtn.addActionListener(e -> {
             // Open the CreateExamForm
@@ -716,13 +864,17 @@ public class MainGUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "No exams found.");
             } else {
                 JList<String> list = new JList<>(exams.toArray(new String[0]));
-                JOptionPane.showMessageDialog(this, new JScrollPane(list), "All Exams", JOptionPane.PLAIN_MESSAGE);
+                list.setFont(UITheme.FONT_BODY);
+                JScrollPane scrollPane = new JScrollPane(list);
+                JOptionPane.showMessageDialog(this, scrollPane, " All Exams", JOptionPane.PLAIN_MESSAGE);
             }
         });
 
         studentReportsBtn.addActionListener(e -> showStudentReports());
 
         JPanel buttonPanel = new JPanel(new GridLayout(5, 1, 10, 10));
+        buttonPanel.setOpaque(false);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
         buttonPanel.add(createExamBtn);
         buttonPanel.add(modifyExamBtn);
         buttonPanel.add(deleteExamBtn);
@@ -838,7 +990,7 @@ public class MainGUI extends JFrame {
         panel.add(new JLabel("🔐 Password:"));
         panel.add(passwordField);
 
-        int result = JOptionPane.showConfirmDialog(this, panel, "✏️ Update User", JOptionPane.OK_CANCEL_OPTION);
+        int result = JOptionPane.showConfirmDialog(this, panel, "Update User", JOptionPane.OK_CANCEL_OPTION);
         
         if (result == JOptionPane.OK_OPTION) {
             if (nameField.getText().trim().isEmpty() || emailField.getText().trim().isEmpty() || 

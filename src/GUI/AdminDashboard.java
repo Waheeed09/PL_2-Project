@@ -37,23 +37,37 @@ public class AdminDashboard extends JFrame {
     }
 
     private void initComponents() {
+        String bgPath = "D:\\Uni_Bedo\\Pl2\\Project_pl2\\PL_2-Project\\resources\\WhatsApp Image 2026-01-11 at 4.44.40 PM.jpeg";
+        Image bg = UITheme.loadBackgroundImageAbsolute(bgPath);
+        JPanel background = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (bg != null) g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        background.setLayout(new BorderLayout());
+
         JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setOpaque(false);
 
         userListModel = new DefaultListModel<>();
         userList = new JList<>(userListModel);
+        userList.setFont(UITheme.FONT_BODY);
         refreshUserList();
 
         JScrollPane scrollPane = new JScrollPane(userList);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(2, 3, 5, 5));
+        JPanel buttonPanel = new JPanel(new GridLayout(2, 3, 8, 8));
+        buttonPanel.setOpaque(false);
 
-        JButton btnAddUser = new JButton("Add User");
-        JButton btnModifyUser = new JButton("Modify User");
-        JButton btnDeleteUser = new JButton("Delete User");
-        JButton btnRefresh = new JButton("Refresh List");
-        JButton btnAssignSubject = new JButton("Assign Subject");
-        JButton btnUpdateStudent = new JButton("Update Student");
+        JButton btnAddUser = new JButton("Add User"); UITheme.styleButton(btnAddUser);
+        JButton btnModifyUser = new JButton("Modify User"); UITheme.styleButton(btnModifyUser);
+        JButton btnDeleteUser = new JButton("Delete User"); UITheme.styleButton(btnDeleteUser);
+        JButton btnRefresh = new JButton("Refresh List"); UITheme.styleButton(btnRefresh);
+        JButton btnAssignSubject = new JButton("Assign Subject"); UITheme.styleButton(btnAssignSubject);
+        JButton btnUpdateStudent = new JButton("Update Student"); UITheme.styleButton(btnUpdateStudent);
 
         buttonPanel.add(btnAddUser);
         buttonPanel.add(btnModifyUser);
@@ -64,7 +78,8 @@ public class AdminDashboard extends JFrame {
 
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        add(mainPanel);
+        background.add(mainPanel, BorderLayout.CENTER);
+        setContentPane(background);
 
         // Actions
         btnAddUser.addActionListener(e -> addUser());

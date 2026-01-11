@@ -1,14 +1,13 @@
 package GUI;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import models.Lecturer;
+import javax.swing.*;
 import models.Exam;
+import models.Lecturer;
 import models.Question;
 import services.LecturerService;
-import models.User;
 
 public class LecturerDashboard extends JFrame {
 
@@ -30,19 +29,33 @@ public class LecturerDashboard extends JFrame {
     }
 
     private void initComponents() {
+        String bgPath = "D:\\Uni_Bedo\\Pl2\\Project_pl2\\PL_2-Project\\resources\\WhatsApp Image 2026-01-11 at 4.44.40 PM.jpeg";
+        Image bg = UITheme.loadBackgroundImageAbsolute(bgPath);
+        JPanel background = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (bg != null) g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        background.setLayout(new BorderLayout());
+
         JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setOpaque(false);
 
         DefaultListModel<String> examListModel = new DefaultListModel<>();
         JList<String> examList = new JList<>(examListModel);
+        examList.setFont(UITheme.FONT_BODY);
         JScrollPane scrollPane = new JScrollPane(examList);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 5, 5, 5));
-        JButton btnCreate = new JButton("Create Exam");
-        JButton btnModify = new JButton("Modify Exam");
-        JButton btnDelete = new JButton("Delete Exam");
-        JButton btnView = new JButton("View Exams");
-        JButton btnAddQ = new JButton("Add Question");
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 5, 8, 8));
+        buttonPanel.setOpaque(false);
+        JButton btnCreate = new JButton("Create Exam"); UITheme.styleButton(btnCreate);
+        JButton btnModify = new JButton("Modify Exam"); UITheme.styleButton(btnModify);
+        JButton btnDelete = new JButton("Delete Exam"); UITheme.styleButton(btnDelete);
+        JButton btnView = new JButton("View Exams"); UITheme.styleButton(btnView);
+        JButton btnAddQ = new JButton("Add Question"); UITheme.styleButton(btnAddQ);
 
         buttonPanel.add(btnCreate);
         buttonPanel.add(btnModify);
@@ -51,7 +64,8 @@ public class LecturerDashboard extends JFrame {
         buttonPanel.add(btnAddQ);
 
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-        add(mainPanel);
+        background.add(mainPanel, BorderLayout.CENTER);
+        setContentPane(background);
 
         btnCreate.addActionListener(e -> {
             JTextField idField = new JTextField();

@@ -4,3 +4,6 @@
 11,DR Ahmed Al swar,lec@,123,lecturer
 2006,abdullah hisham,bedo@,123,admin
 123,ABDO,aa@,123,admin
+1,عبدالله,a@,123,admin
+123,شش,s@,123,lecturer
+1,ي,d@,123,student

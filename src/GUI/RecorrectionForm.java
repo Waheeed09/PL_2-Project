@@ -13,7 +13,7 @@ public class RecorrectionForm extends JFrame {
         this.student = student;
 
         setTitle("Request Recorrection - " + student.getName());
-        setSize(500, 400);
+        setSize(560, 420);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -21,39 +21,40 @@ public class RecorrectionForm extends JFrame {
     }
 
     private void initComponents() {
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        String bgPath = "D:\\Uni_Bedo\\Pl2\\Project_pl2\\PL_2-Project\\resources\\WhatsApp Image 2026-01-11 at 4.44.40 PM.jpeg";
+        Image bg = UITheme.loadBackgroundImageAbsolute(bgPath);
+        JPanel background = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (bg != null) g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        background.setLayout(new BorderLayout());
+        background.setBorder(BorderFactory.createEmptyBorder(12,12,12,12));
 
-        // Title
         JLabel titleLabel = new JLabel("Request Recorrection", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        mainPanel.add(titleLabel, BorderLayout.NORTH);
+        titleLabel.setFont(UITheme.FONT_TITLE);
+        titleLabel.setForeground(UITheme.TEXT_COLOR);
+        background.add(titleLabel, BorderLayout.NORTH);
 
-        // Message area
-        JPanel textPanel = new JPanel(new BorderLayout(5, 5));
-        JLabel messageLabel = new JLabel("Describe your recorrection request:");
-        JTextArea messageArea = new JTextArea(15, 40);
+        JTextArea messageArea = new JTextArea();
         messageArea.setLineWrap(true);
         messageArea.setWrapStyleWord(true);
-        messageArea.setFont(new Font("Arial", Font.PLAIN, 12));
-
+        messageArea.setFont(UITheme.FONT_BODY);
+        messageArea.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(UITheme.BORDER_COLOR), BorderFactory.createEmptyBorder(8,8,8,8)));
         JScrollPane scrollPane = new JScrollPane(messageArea);
-        textPanel.add(messageLabel, BorderLayout.NORTH);
-        textPanel.add(scrollPane, BorderLayout.CENTER);
+        background.add(scrollPane, BorderLayout.CENTER);
 
-        mainPanel.add(textPanel, BorderLayout.CENTER);
-
-        // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        JButton submitButton = new JButton("Submit");
-        JButton cancelButton = new JButton("Cancel");
-
+        buttonPanel.setOpaque(false);
+        RoundedButton submitButton = new RoundedButton("Submit"); submitButton.setBackground(UITheme.PRIMARY_COLOR);
+        RoundedButton cancelButton = new RoundedButton("Cancel"); cancelButton.setBackground(UITheme.BORDER_COLOR);
         buttonPanel.add(submitButton);
         buttonPanel.add(cancelButton);
+        background.add(buttonPanel, BorderLayout.SOUTH);
 
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-        add(mainPanel);
+        setContentPane(background);
 
         // Event handlers
         submitButton.addActionListener(e -> {
@@ -78,17 +79,11 @@ public class RecorrectionForm extends JFrame {
 
     private boolean saveRecorrection(String message) {
         try {
-            // Ensure data directory exists
             new File("data").mkdirs();
-
-            // Create recorrection entry
             String recorrectionData = student.getId() + "|" + student.getName() + "|" + message + "|" + System.currentTimeMillis();
-
-            // Append to recorrections.txt
             try (java.io.FileWriter fw = new java.io.FileWriter("data/recorrections.txt", true)) {
                 fw.write(recorrectionData + "\n");
             }
-
             return true;
         } catch (IOException ex) {
             System.err.println("Error saving recorrection: " + ex.getMessage());

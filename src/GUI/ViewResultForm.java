@@ -7,6 +7,7 @@ import models.Result;
 import models.Student;
 import java.util.List;
 import java.util.ArrayList;
+import java.awt.*;
 
 public class ViewResultForm extends JFrame {
 
@@ -14,35 +15,51 @@ public class ViewResultForm extends JFrame {
 
 	public ViewResultForm() {
 		setTitle("View Results");
-		setSize(500, 400);
+		setSize(640, 480);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setLayout(null);
+		setLocationRelativeTo(null);
 
-		JLabel lbl = new JLabel("Student:");
-		lbl.setBounds(20, 20, 60, 25);
-		add(lbl);
+		String bgPath = "D:\\Uni_Bedo\\Pl2\\Project_pl2\\PL_2-Project\\resources\\WhatsApp Image 2026-01-11 at 4.44.40 PM.jpeg";
+		Image bg = UITheme.loadBackgroundImageAbsolute(bgPath);
+		JPanel background = new JPanel() {
+			@Override
+			protected void paintComponent(Graphics g) {
+				super.paintComponent(g);
+				if (bg != null) g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+			}
+		};
+		background.setLayout(new GridBagLayout());
+		background.setBorder(BorderFactory.createEmptyBorder(12,12,12,12));
+		setContentPane(background);
+
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.insets = new Insets(8,8,8,8);
+		gbc.fill = GridBagConstraints.BOTH;
+
+		JLabel title = new JLabel("Student Results", JLabel.CENTER);
+		title.setFont(UITheme.FONT_TITLE);
+		title.setForeground(UITheme.TEXT_COLOR);
+		gbc.gridx=0; gbc.gridy=0; gbc.gridwidth=3; gbc.weightx=1.0; gbc.weighty=0.0;
+		background.add(title, gbc);
 
 		JComboBox<String> studentCombo = new JComboBox<>();
-		studentCombo.setBounds(90, 20, 200, 25);
-		add(studentCombo);
+		studentCombo.setFont(UITheme.FONT_BODY);
+		gbc.gridy=1; gbc.gridwidth=1; gbc.weightx=0.0; gbc.weighty=0.0; gbc.gridx=0;
+		background.add(studentCombo, gbc);
 
-		JButton showBtn = new JButton("Show");
-		showBtn.setBounds(300, 20, 80, 25);
-		add(showBtn);
-
-		JButton showAllBtn = new JButton("Show All");
-		showAllBtn.setBounds(390, 20, 80, 25);
-		add(showAllBtn);
-
-		JButton registerBtn = new JButton("Register");
-		registerBtn.setBounds(20, 350, 100, 25);
-		add(registerBtn);
+		RoundedButton showBtn = new RoundedButton("Show"); showBtn.setBackground(UITheme.PRIMARY_COLOR);
+		RoundedButton showAllBtn = new RoundedButton("Show All"); showAllBtn.setBackground(UITheme.PRIMARY_COLOR.darker());
+		gbc.gridx=1; gbc.weightx=0.0; background.add(showBtn, gbc);
+		gbc.gridx=2; background.add(showAllBtn, gbc);
 
 		JTextArea area = new JTextArea();
 		area.setEditable(false);
+		area.setFont(UITheme.FONT_BODY);
 		JScrollPane sp = new JScrollPane(area);
-		sp.setBounds(20, 60, 430, 280);
-		add(sp);
+		gbc.gridx=0; gbc.gridy=2; gbc.gridwidth=3; gbc.weighty=1.0; background.add(sp, gbc);
+
+		RoundedButton registerBtn = new RoundedButton("Register"); registerBtn.setBackground(UITheme.BORDER_COLOR);
+		gbc.gridy=3; gbc.gridwidth=1; gbc.weighty=0.0; gbc.gridx=0; background.add(registerBtn, gbc);
 
 		// populate students combo from data/students.txt
 		ArrayList<Student> students = (ArrayList<Student>) FileManager.loadStudents();
@@ -97,7 +114,6 @@ public class ViewResultForm extends JFrame {
 			String pwd = JOptionPane.showInputDialog(this, "Password:");
 			if (pwd == null) return;
 
-			// load current students, add new, save
 			ArrayList<Student> cur = (ArrayList<Student>) FileManager.loadStudents();
 			int maxId = 0;
 			for (Student s : cur) if (s.getId() > maxId) maxId = s.getId();
@@ -115,4 +131,3 @@ public class ViewResultForm extends JFrame {
 		SwingUtilities.invokeLater(() -> new ViewResultForm());
 	}
 }
-

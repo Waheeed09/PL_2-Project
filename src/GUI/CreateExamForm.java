@@ -1,12 +1,12 @@
 // ...existing code...
 package GUI;
 
-import javax.swing.*;
 import java.awt.*;
-import java.nio.file.*;
 import java.io.IOException;
-import java.util.List;
+import java.nio.file.*;
 import java.util.Arrays;
+import java.util.List;
+import javax.swing.*;
 import models.Question;
 import services.FileManager;
 
@@ -17,48 +17,74 @@ public class CreateExamForm {
 
     public CreateExamForm() {
         frame = new JFrame("Create Exam");
-        frame.setSize(420, 220);
+        frame.setSize(480, 260);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setLocationRelativeTo(null);
-        frame.setLayout(new GridBagLayout());
+
+        String bgPath = "D:\\Uni_Bedo\\Pl2\\Project_pl2\\PL_2-Project\\resources\\WhatsApp Image 2026-01-11 at 4.44.40 PM.jpeg";
+        Image bg = UITheme.loadBackgroundImageAbsolute(bgPath);
+        JPanel background = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (bg != null) g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        background.setLayout(new GridBagLayout());
+        frame.setContentPane(background);
 
         GridBagConstraints g = new GridBagConstraints();
-        g.insets = new Insets(6,6,6,6);
+        g.insets = new Insets(8,10,8,10);
         g.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel lblId = new JLabel("Exam ID:");
-        JTextField txtId = new JTextField();
+        JLabel lblTitle = new JLabel("Create New Exam", JLabel.CENTER);
+        lblTitle.setFont(UITheme.FONT_TITLE);
+        lblTitle.setForeground(UITheme.TEXT_COLOR);
+        g.gridx = 0; g.gridy = 0; g.gridwidth = 2;
+        background.add(lblTitle, g);
 
-        JLabel lblSubject = new JLabel("Subject:");
-        JComboBox<String> cbSubjects = new JComboBox<>();
+        JLabel lblId = new JLabel("Exam ID:"); lblId.setFont(UITheme.FONT_LABEL); lblId.setForeground(UITheme.TEXT_COLOR);
+        JTextField txtId = new JTextField(); UITheme.styleTextField(txtId);
 
-        JLabel lblDate = new JLabel("Date (YYYY-MM-DD):");
-        JTextField txtDate = new JTextField();
+        JLabel lblSubject = new JLabel("Subject:"); lblSubject.setFont(UITheme.FONT_LABEL); lblSubject.setForeground(UITheme.TEXT_COLOR);
+        JComboBox<String> cbSubjects = new JComboBox<>(); cbSubjects.setFont(UITheme.FONT_BODY);
 
-        JLabel lblDuration = new JLabel("Duration (mins):");
-        JTextField txtDuration = new JTextField();
+        JLabel lblDate = new JLabel("Date (YYYY-MM-DD):"); lblDate.setFont(UITheme.FONT_LABEL); lblDate.setForeground(UITheme.TEXT_COLOR);
+        JTextField txtDate = new JTextField(); UITheme.styleTextField(txtDate);
+
+        JLabel lblDuration = new JLabel("Duration (mins):"); lblDuration.setFont(UITheme.FONT_LABEL); lblDuration.setForeground(UITheme.TEXT_COLOR);
+        JTextField txtDuration = new JTextField(); UITheme.styleTextField(txtDuration);
 
         // populate subjects from subjects.txt
         loadSubjects(cbSubjects);
 
-        JButton btnCreate = new JButton("Create");
-        JButton btnCancel = new JButton("Cancel");
+        RoundedButton btnCreate = new RoundedButton("✓ Create Exam", UITheme.createLetterIcon("C", UITheme.PRIMARY_COLOR, Color.WHITE, 20));
+        btnCreate.setBackground(UITheme.PRIMARY_COLOR);
+        btnCreate.setFont(new Font("Arial", Font.BOLD, 13));
+        btnCreate.setForeground(Color.WHITE);
+        btnCreate.setPreferredSize(new Dimension(140, 40));
+        
+        RoundedButton btnCancel = new RoundedButton("✕ Cancel", UITheme.createLetterIcon("X", Color.RED, Color.WHITE, 18));
+        btnCancel.setBackground(Color.RED.darker());
+        btnCancel.setFont(new Font("Arial", Font.BOLD, 13));
+        btnCancel.setForeground(Color.WHITE);
+        btnCancel.setPreferredSize(new Dimension(120, 40));
 
-        g.gridx = 0; g.gridy = 0; frame.add(lblId, g);
-        g.gridx = 1; g.gridy = 0; g.weightx = 1.0; frame.add(txtId, g);
+        g.gridx = 0; g.gridy = 1; g.gridwidth = 1; background.add(lblId, g);
+        g.gridx = 1; g.gridy = 1; g.weightx = 1.0; background.add(txtId, g);
 
-        g.gridx = 0; g.gridy = 1; g.weightx = 0; frame.add(lblSubject, g);
-        g.gridx = 1; g.gridy = 1; g.weightx = 1.0; frame.add(cbSubjects, g);
+        g.gridx = 0; g.gridy = 2; g.weightx = 0; background.add(lblSubject, g);
+        g.gridx = 1; g.gridy = 2; g.weightx = 1.0; background.add(cbSubjects, g);
 
-        g.gridx = 0; g.gridy = 2; g.weightx = 0; frame.add(lblDate, g);
-        g.gridx = 1; g.gridy = 2; g.weightx = 1.0; frame.add(txtDate, g);
+        g.gridx = 0; g.gridy = 3; g.weightx = 0; background.add(lblDate, g);
+        g.gridx = 1; g.gridy = 3; g.weightx = 1.0; background.add(txtDate, g);
 
-        g.gridx = 0; g.gridy = 3; g.weightx = 0; frame.add(lblDuration, g);
-        g.gridx = 1; g.gridy = 3; g.weightx = 1.0; frame.add(txtDuration, g);
+        g.gridx = 0; g.gridy = 4; g.weightx = 0; background.add(lblDuration, g);
+        g.gridx = 1; g.gridy = 4; g.weightx = 1.0; background.add(txtDuration, g);
 
-        JPanel pBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel pBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT)); pBtns.setOpaque(false);
         pBtns.add(btnCreate); pBtns.add(btnCancel);
-        g.gridx = 0; g.gridy = 4; g.gridwidth = 2; frame.add(pBtns, g);
+        g.gridx = 0; g.gridy = 5; g.gridwidth = 2; background.add(pBtns, g);
 
         btnCreate.addActionListener(e -> {
             String examId = txtId.getText().trim();

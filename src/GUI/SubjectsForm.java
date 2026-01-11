@@ -1,46 +1,58 @@
-// ...existing code...
 package GUI;
 
+import java.awt.*;
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.Arrays;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.nio.file.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Arrays;
 
 public class SubjectsForm {
-    private final Path subjectsFile = Paths.get("d:\\VSC\\CollegeExaminationSystemPage\\PL_2-Project\\data\\subjects.txt");
+    private final Path subjectsFile = Paths.get("data/subjects.txt");
     private JFrame frame;
     private DefaultTableModel model;
 
     public SubjectsForm() {
         frame = new JFrame("Subjects");
-        frame.setSize(600, 400);
+        frame.setSize(720, 480);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setLocationRelativeTo(null);
-        frame.setLayout(null);
+
+        String bgPath = "D:\\Uni_Bedo\\Pl2\\Project_pl2\\PL_2-Project\\resources\\WhatsApp Image 2026-01-11 at 4.44.40 PM.jpeg";
+        Image bg = UITheme.loadBackgroundImageAbsolute(bgPath);
+        JPanel background = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (bg != null) g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        background.setLayout(new BorderLayout());
+        background.setBorder(BorderFactory.createEmptyBorder(12,12,12,12));
+        frame.setContentPane(background);
 
         model = new DefaultTableModel(new String[]{"ID", "Name", "LecturerId", "Enrolled"}, 0) {
             @Override public boolean isCellEditable(int row, int col) { return false; }
         };
         JTable table = new JTable(model);
+        UITheme.styleTable(table);
         JScrollPane sp = new JScrollPane(table);
-        sp.setBounds(10, 10, 560, 280);
 
-        JButton btnAdd = new JButton("Add");
-        JButton btnAssign = new JButton("Assign Lecturer");
-        JButton btnEnroll = new JButton("Enroll Student");
-        JButton btnRefresh = new JButton("Refresh");
+        JPanel top = new JPanel(new BorderLayout()); top.setOpaque(false);
+        JLabel title = new JLabel("Subjects", JLabel.LEFT); title.setFont(UITheme.FONT_TITLE); title.setForeground(UITheme.TEXT_COLOR);
+        top.add(title, BorderLayout.WEST);
 
-        JPanel btnPanel = new JPanel();
-        btnPanel.add(btnAdd);
-        btnPanel.add(btnAssign);
-        btnPanel.add(btnEnroll);
-        btnPanel.add(btnRefresh);
-        btnPanel.setBounds(10, 300, 560, 40);
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0)); btnPanel.setOpaque(false);
+        RoundedButton btnAdd = new RoundedButton("Add"); btnAdd.setBackground(UITheme.PRIMARY_COLOR);
+        RoundedButton btnAssign = new RoundedButton("Assign Lecturer"); btnAssign.setBackground(UITheme.PRIMARY_COLOR.darker());
+        RoundedButton btnEnroll = new RoundedButton("Enroll Student"); btnEnroll.setBackground(UITheme.PRIMARY_COLOR.darker());
+        RoundedButton btnRefresh = new RoundedButton("Refresh"); btnRefresh.setBackground(UITheme.BORDER_COLOR);
+        btnPanel.add(btnAdd); btnPanel.add(btnAssign); btnPanel.add(btnEnroll); btnPanel.add(btnRefresh);
+        top.add(btnPanel, BorderLayout.EAST);
 
-        frame.add(sp);
-        frame.add(btnPanel);
+        background.add(top, BorderLayout.NORTH);
+        background.add(sp, BorderLayout.CENTER);
 
         btnAdd.addActionListener(e -> addSubject());
         btnAssign.addActionListener(e -> JOptionPane.showMessageDialog(frame, "Assign Lecturer not supported with subjects.txt backend"));
@@ -54,13 +66,14 @@ public class SubjectsForm {
     private void loadData() {
         model.setRowCount(0);
         try {
+            if (!Files.exists(subjectsFile)) return;
             List<String> lines = Files.readAllLines(subjectsFile);
             boolean headerSkipped = false;
             for (String line : lines) {
                 if (line == null) continue;
                 line = line.trim();
                 if (line.isEmpty()) continue;
-                if (!headerSkipped) { headerSkipped = true; continue; } // skip header
+                if (!headerSkipped) { headerSkipped = true; continue; }
                 String[] parts = line.split(",", 2);
                 String id = parts.length > 0 ? parts[0].trim() : "";
                 String name = parts.length > 1 ? parts[1].trim() : "";
@@ -79,7 +92,6 @@ public class SubjectsForm {
 
         String line = id.trim() + "," + name.trim();
         try {
-            // ensure file exists with header
             if (!Files.exists(subjectsFile)) {
                 Files.createDirectories(subjectsFile.getParent());
                 Files.write(subjectsFile, Arrays.asList("subjectId,subjectName"), StandardOpenOption.CREATE);
@@ -99,4 +111,3 @@ public class SubjectsForm {
         });
     }
 }
-// ...existing code...

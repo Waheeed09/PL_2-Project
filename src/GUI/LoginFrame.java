@@ -1,13 +1,13 @@
 package GUI;
 
-import javax.swing.*;
 import java.awt.*;
-import services.UserService;
-import services.StudentService;
-import services.LecturerService;
-import models.User;
-import models.Student;
+import javax.swing.*;
 import models.Lecturer;
+import models.Student;
+import models.User;
+import services.LecturerService;
+import services.StudentService;
+import services.UserService;
 
 public class LoginFrame extends JFrame {
 
@@ -25,30 +25,74 @@ public class LoginFrame extends JFrame {
         this.lecturerService = lecturerService;
 
         setTitle("Login");
-        setSize(350, 200);
+        setSize(420, 280);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         initComponents();
     }
 
     private void initComponents() {
-        JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
+        // Background panel that paints the application background image
+        String bgPath = "D:\\Uni_Bedo\\Pl2\\Project_pl2\\PL_2-Project\\resources\\WhatsApp Image 2026-01-11 at 4.44.40 PM.jpeg";
+        Image bg = UITheme.loadBackgroundImageAbsolute(bgPath);
+        JPanel background = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (bg != null) {
+                    g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+                }
+            }
+        };
+        background.setLayout(new GridBagLayout());
 
-        panel.add(new JLabel("Email:"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 12, 8, 12);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel systemLabel = new JLabel("University Examination System", JLabel.CENTER);
+        systemLabel.setFont(UITheme.FONT_TITLE);
+        systemLabel.setForeground(UITheme.TEXT_COLOR);
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        background.add(systemLabel, gbc);
+
+        JPanel form = new JPanel(new GridLayout(2, 2, 8, 8));
+        form.setOpaque(false);
+
+        JLabel emailLabel = new JLabel("Email:");
+        emailLabel.setFont(UITheme.FONT_LABEL);
+        emailLabel.setForeground(UITheme.TEXT_COLOR);
+        form.add(emailLabel);
         txtEmail = new JTextField();
-        panel.add(txtEmail);
+        txtEmail.setFont(UITheme.FONT_BODY);
+        form.add(txtEmail);
 
-        panel.add(new JLabel("Password:"));
+        JLabel passLabel = new JLabel("Password:");
+        passLabel.setFont(UITheme.FONT_LABEL);
+        passLabel.setForeground(UITheme.TEXT_COLOR);
+        form.add(passLabel);
         txtPassword = new JPasswordField();
-        panel.add(txtPassword);
+        txtPassword.setFont(UITheme.FONT_BODY);
+        form.add(txtPassword);
 
-        btnLogin = new JButton("Login");
-        btnRegister = new JButton("Register");
+        gbc.gridy = 1; gbc.gridx = 0; gbc.gridwidth = 2;
+        background.add(form, gbc);
 
-        panel.add(btnLogin);
-        panel.add(btnRegister);
+        btnLogin = new RoundedButton("Login", UITheme.createLetterIcon("IN", UITheme.PRIMARY_COLOR, Color.WHITE, 22));
+        btnLogin.setBackground(UITheme.PRIMARY_COLOR);
 
-        add(panel);
+        btnRegister = new RoundedButton("Register", UITheme.createLetterIcon("+", UITheme.PRIMARY_COLOR.darker(), Color.WHITE, 22));
+        btnRegister.setBackground(UITheme.PRIMARY_COLOR.darker());
+
+        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 6));
+        btnRow.setOpaque(false);
+        btnRow.add(btnLogin);
+        btnRow.add(btnRegister);
+
+        gbc.gridy = 2; gbc.gridx = 0; gbc.gridwidth = 2;
+        background.add(btnRow, gbc);
+
+        setContentPane(background);
 
         // Action listeners
         btnLogin.addActionListener(e -> loginAction());

@@ -9,3 +9,4 @@
 15,Math,0.0,false,APPROVED
 123,Math,100.0,true,APPROVED
 123,Math,50.0,true,APPROVED
+1,db,100.0,true
