@@ -684,17 +684,17 @@ panel.add(backButton, gbc);
 
     private void showStudentPanel(JPanel parent) {
         JButton takeExamBtn = new RoundedButton(" Take Exam");
-        takeExamBtn.setBackground(UITheme.PRIMARY_COLOR);
+        takeExamBtn.setBackground(new Color(60, 80, 100));
         JButton viewResultsBtn = new RoundedButton(" View Results");
-        viewResultsBtn.setBackground(new Color(0, 153, 76));
+        viewResultsBtn.setBackground(new Color(70, 90, 110));
         JButton viewSubjectsBtn = new RoundedButton(" My Subjects");
-        viewSubjectsBtn.setBackground(new Color(255, 165, 0));
+        viewSubjectsBtn.setBackground(new Color(80, 100, 120));
         JButton feedbackBtn = new RoundedButton(" Feedback");
-        feedbackBtn.setBackground(new Color(155, 89, 182));
+        feedbackBtn.setBackground(new Color(90, 110, 130));
         JButton recorrectionBtn = new RoundedButton(" Request Recorrection");
-        recorrectionBtn.setBackground(Color.RED.darker());
+        recorrectionBtn.setBackground(new Color(100, 120, 140));
         JButton updateProfileBtn = new RoundedButton(" Update Profile");
-        updateProfileBtn.setBackground(new Color(52, 152, 219));
+        updateProfileBtn.setBackground(new Color(75, 95, 115));
 
         takeExamBtn.addActionListener(e -> {
             TakeExamForm takeExamForm = new TakeExamForm(loggedInUser.getId());
@@ -833,15 +833,15 @@ panel.add(backButton, gbc);
 
      private void showLecturerPanel(JPanel parent) {
         JButton createExamBtn = new RoundedButton("Create Exam");
-        createExamBtn.setBackground(UITheme.PRIMARY_COLOR);
+        createExamBtn.setBackground(new Color(60, 80, 100));
         JButton modifyExamBtn = new RoundedButton("Modify Exam");
-        modifyExamBtn.setBackground(new Color(255, 165, 0));
+        modifyExamBtn.setBackground(new Color(80, 100, 120));
         JButton deleteExamBtn = new RoundedButton("Delete Exam");
-        deleteExamBtn.setBackground(Color.RED.darker());
+        deleteExamBtn.setBackground(new Color(100, 120, 140));
         JButton viewExamsBtn = new RoundedButton("👁️ View All Exams");
-        viewExamsBtn.setBackground(new Color(0, 153, 76));
+        viewExamsBtn.setBackground(new Color(70, 90, 110));
         JButton studentReportsBtn = new RoundedButton("📈 Student Reports");
-        studentReportsBtn.setBackground(new Color(155, 89, 182));
+        studentReportsBtn.setBackground(new Color(90, 110, 130));
 
         createExamBtn.addActionListener(e -> {
             // Open the CreateExamForm
