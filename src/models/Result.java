@@ -10,7 +10,7 @@ public class Result {
         this.studentId = studentId;
         this.subjectId = subjectId;
         this.grade = grade;
-        this.approved = false; // default
+        this.approved = false; 
     }
 
     // Getters and setters

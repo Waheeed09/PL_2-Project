@@ -6,13 +6,12 @@ public class Question {
 
     private int id;
     private String examId;
-    private String text;                 // نص السؤال
-    private String correctAnswer;         // الإجابة الصحيحة
-    private String type;                 // MC / TF / SA
-    private List<String> options;         // اختيارات (لو موجودة)
-    private int points;                  // درجة السؤال
+    private String text;                
+    private String correctAnswer;        
+    private String type;                 
+    private List<String> options;        
+    private int points;                  
 
-    // Constructor كامل (للاستخدام الأساسي)
     public Question(int id, String examId, String text,
                     String correctAnswer, String type,
                     List<String> options, int points) {
@@ -26,7 +25,6 @@ public class Question {
         this.points = points;
     }
 
-    // Constructor بسيط (عشان الكود القديم ميقعش)
     public Question(int id, String text, String correctAnswer) {
         this.id = id;
         this.text = text;
@@ -34,7 +32,6 @@ public class Question {
         this.points = 1;
     }
 
-    // Setter for examId to support loading from FileManager
     public void setExamId(String examId) {
         this.examId = examId;
     }
@@ -52,7 +49,6 @@ public class Question {
         return id;
     }
 
-    // Backwards-compatible name used in FileManager
     public int getQuestionId() {
         return id;
     }
@@ -69,7 +65,6 @@ public class Question {
         return correctAnswer;
     }
 
-    // دعم الكود القديم اللي بيستخدم getCorrect()
     public String getCorrect() {
         return correctAnswer;
     }
@@ -96,7 +91,6 @@ public class Question {
         this.correctAnswer = correctAnswer;
     }
 
-    // دعم الكود القديم
     public void setCorrect(String correct) {
         this.correctAnswer = correct;
     }

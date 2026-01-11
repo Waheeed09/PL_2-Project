@@ -1,4 +1,6 @@
 1,dr hema,ham@,123,lecturer
 15,stu1,stu@,1234,student
 303,basel,test@3,456,admin
-
+11,DR Ahmed Al swar,lec@,123,lecturer
+2006,abdullah hisham,bedo@,123,admin
+123,ABDO,aa@,123,admin

@@ -5,7 +5,6 @@ EX3,English
 EX4,Algorithms
 EX5,Programming
 12,is
-cs2,pl3
 it1,it
 it2,it
 cs,Math
@@ -14,3 +13,4 @@ cs,Math
 1001,Math
 1002,Math
 1003,Math
+db,db

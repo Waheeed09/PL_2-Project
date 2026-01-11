@@ -8,15 +8,15 @@ public class Subject {
     
      private String subjectId;
     private String subjectName;
-    private Lecturer lecturer; // ممكن يكون null
-    private int lecturerId; // fallback id when Lecturer object not set
+    private Lecturer lecturer; 
+    private int lecturerId;
     private List<String> enrolledStudents;
 
     public Subject(String subjectId, String subjectName) {
         this.subjectId = subjectId;
         this.subjectName = subjectName;
         this.enrolledStudents = new ArrayList<>();
-        this.lecturer = null; // افتراضي
+        this.lecturer = null;  
         this.lecturerId = 0;
     }
 
@@ -46,7 +46,6 @@ public class Subject {
         this.lecturer = lecturer;
     }
 
-    // Get lecturer ID easily
     public int getLecturerId() {
         if (lecturer != null) return lecturer.getId();
         return lecturerId;
@@ -54,7 +53,7 @@ public class Subject {
 
     public void setLecturerId(int lecturerId) {
         this.lecturerId = lecturerId;
-        this.lecturer = null; // clear object reference when id set externally
+        this.lecturer = null; 
     }
 
     public List<String> getEnrolledStudents() {

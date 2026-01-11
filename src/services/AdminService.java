@@ -30,7 +30,7 @@ public class AdminService {
     if (user == null) {
         System.out.println("Invalid user");
         return;
-    }//Defensive Programming حمايه الكود من 
+    }
 
     for (User u : users) {
         if (u.getEmail().equals(user.getEmail())) {
@@ -59,6 +59,9 @@ public class AdminService {
         System.out.println(" User not found!");
         return false;
     }
+
+
+    
 
     public boolean updateUser(int id, String name, String email, String password) {
     if (users.isEmpty()) {
@@ -178,7 +181,7 @@ public class AdminService {
         return results;
     }
     
-    // Print results to console (separate from getter)
+    
     public void listResults() {
         if (results.isEmpty()) {
             System.out.println("No results available");

@@ -1,9 +1,2 @@
-1,hisham,his@,12345
-21,dr habdullah,abd@,12345
-101,ahmed,test@,12345
-202,peter,test1@,14789
-123,kk,k@,123
 15,stu1,stu@,1234
-123,stu2,stud@,123
-12345,abdo,abdo@gmail,123
-123,abdo,abdo@,123
+17,peter,peter@,123
