@@ -7,3 +7,7 @@
 1,عبدالله,a@,123,admin
 123,شش,s@,123,lecturer
 1,ي,d@,123,student
+123,ِAbdullah Hisham,q@,123,admin
+123,Dr. Peter,w@,123,lecturer
+123,Ahmed,e@,123,student
+123,Hema,r@,123,student
